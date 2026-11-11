@@ -3,7 +3,23 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Poppins, Jost } from "next/font/google";
 import "./nav.css";
+
+// Fonts are loaded HERE, so no change is needed in layout.js
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jost",
+  display: "swap",
+});
 
 const BRAND_TITLE = "Saahra";
 const LOGO_TEXT = "#CONSCIOUSEFFORT";
@@ -16,9 +32,9 @@ const DASHBOARD_HREF = "/consciousmain/dashboard";
 
 const LINKS = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Previous Events", href: "/previous-events" },
   { label: "Upcoming Events", href: "/upcoming-events" },
+  { label: "Previous Events", href: "/previous-events" },
+  { label: "About", href: "/about" },
   { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
 ];
 
@@ -176,6 +192,7 @@ export default function Nav() {
     <div
       ref={rootRef}
       data-rm-nav
+      className={`rm-root ${poppins.variable} ${jost.variable}`}
       style={{ display: primary ? "contents" : "none" }}
     >
       <div

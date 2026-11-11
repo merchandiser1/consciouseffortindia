@@ -5,8 +5,13 @@
   --rm-nav-h: 80px;
   --rm-drawer-w: clamp(280px, 78vw, 380px);
   --rm-ease: cubic-bezier(0.65, 0, 0.35, 1);
-  --rm-font: var(--font-sans), "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
-  --rm-logo-font: var(--font-serif), "Playfair Display", Georgia, serif;
+}
+
+/* Fonts are loaded in nav.jsx (next/font) and the variables live on this wrapper,
+   so --rm-font / --rm-logo-font must be defined here, not on :root */
+.rm-root {
+  --rm-font: var(--font-poppins), "Poppins", "Helvetica Neue", Arial, sans-serif;
+  --rm-logo-font: var(--font-jost), "Jost", "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ---------- Header: pure black ---------- */
