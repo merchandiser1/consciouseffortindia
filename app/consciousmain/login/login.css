@@ -12,7 +12,7 @@
   --danger: #dc2626;
   --success: #166534;
 
-  /* Playfair Display: loaded in login.jsx via next/font */
+  /* Playfair Display: loaded in page.js via next/font */
   --sa-serif: var(--font-playfair), "Playfair Display", Georgia, serif;
   /* Gill Sans: system font stack (Mac/iOS: Gill Sans, Windows/Office: Gill Sans MT) */
   --sa-sans: "Gill Sans", "Gill Sans MT", "Gill Sans Nova", Calibri, sans-serif;
@@ -134,7 +134,22 @@
 .sa .field input::placeholder { color: #9ca3af; }
 .sa .field input:focus { border-color: var(--ink); box-shadow: 0 0 0 4px rgba(0,0,0,.07); }
 .sa .field.invalid input { border-color: var(--danger); }
-.sa .err { display: block; margin-top: 6px; font-size: 13px; color: var(--danger); }
+.sa .field.invalid input:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, .12);
+}
+
+/* Error message under the input: red text + small "!" icon */
+.sa .err {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin-top: 6px; font-size: 13px; line-height: 1.4; color: var(--danger);
+}
+.sa .err::before {
+  content: "!";
+  flex-shrink: 0; width: 15px; height: 15px; margin-top: 1px;
+  border-radius: 50%; background: var(--danger); color: #fff;
+  font-size: 10px; font-weight: 700; line-height: 15px; text-align: center;
+}
 .sa .hint { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
 
 /* OTP input (forgot password) */

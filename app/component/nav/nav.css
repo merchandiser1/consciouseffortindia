@@ -1,14 +1,12 @@
 :root {
   --rm-ink: #ffffff;
   --rm-bg: #000;
-  --rm-bg-scrolled: #000;
-  --rm-line: rgba(255, 255, 255, 0.14);
   --rm-muted: #9a9a9a;
   --rm-nav-h: 80px;
-  --rm-drawer-w: clamp(240px, 55vw, 340px);
+  --rm-drawer-w: clamp(280px, 78vw, 380px);
   --rm-ease: cubic-bezier(0.65, 0, 0.35, 1);
-  --rm-font: var(--font-poppins), "Helvetica Neue", Arial, sans-serif;
-  --rm-logo-font: var(--font-jost), "Helvetica Neue", Arial, sans-serif;
+  --rm-font: var(--font-sans), "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
+  --rm-logo-font: var(--font-serif), "Playfair Display", Georgia, serif;
 }
 
 /* ---------- Header: pure black ---------- */
@@ -25,7 +23,6 @@
 }
 
 .rm-nav--scrolled {
-  background: var(--rm-bg-scrolled);
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
 }
 
@@ -99,15 +96,11 @@
   transform-origin: left;
 }
 
-.rm-nav__link.is-active {
-  background: transparent;
-  font-weight: 500;
-}
 .rm-nav__link.is-active::after {
   display: none;
 }
 
-/* ---------- Desktop login: white button, black text ---------- */
+/* ---------- Desktop Login / Logout: white button, black text ---------- */
 .rm-nav__login {
   display: inline-block;
   padding: 12px 34px;
@@ -128,13 +121,20 @@
   color: #fff;
 }
 
+/* Logout is a <button>, Login is a <Link>: make them look identical */
+button.rm-nav__login {
+  font-family: inherit;
+  line-height: normal;
+  cursor: pointer;
+}
+
 .rm-nav a:focus-visible,
 .rm-burger:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
 }
 
-/* ---------- Hamburger (original style) ---------- */
+/* ---------- Hamburger ---------- */
 .rm-burger {
   display: none;
   position: relative;
@@ -158,7 +158,7 @@
   background: #fff;
   border-radius: 2px;
   transform-origin: center;
-  transition: transform 0.5s var(--rm-ease), opacity 0.3s ease;
+  transition: transform 0.5s var(--rm-ease);
 }
 
 .rm-burger span:nth-child(1) { transform: translateY(-7px); }
@@ -197,7 +197,7 @@
   width: var(--rm-drawer-w);
   height: 100vh;
   height: 100dvh;
-  padding: 0 20px max(24px, env(safe-area-inset-bottom));
+  padding: 0 24px max(24px, env(safe-area-inset-bottom));
   background: #fff;
   color: #000;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
@@ -227,8 +227,8 @@
   justify-content: space-between;
   flex-shrink: 0;
   height: var(--rm-nav-h);
-  margin: 0 -20px 6px;
-  padding: 0 20px;
+  margin: 0 -24px 6px;
+  padding: 0 24px;
   border-bottom: 1px solid #e8e8e8;
 }
 
@@ -275,13 +275,8 @@
 .rm-close span:nth-child(2) { transform: rotate(-45deg); }
 
 /* Hover: black circle, white X */
-.rm-close:hover {
-  background: #000;
-}
-
-.rm-close:hover span {
-  background: #fff;
-}
+.rm-close:hover { background: #000; }
+.rm-close:hover span { background: #fff; }
 
 /* ---------- Drawer links ---------- */
 .rm-drawer__links {
@@ -337,7 +332,7 @@
   opacity: 1;
 }
 
-/* ---------- Login at the bottom: black button ---------- */
+/* ---------- Login / Logout at the bottom: black button ---------- */
 .rm-drawer__bottom {
   margin-top: auto;
   padding-top: 28px;
@@ -356,12 +351,136 @@
   letter-spacing: 0.06em;
 }
 
+/* Logout is a <button>, Login is a <Link>: make them look identical */
+button.rm-drawer__login {
+  width: 100%;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button.rm-nav__login:disabled,
+button.rm-drawer__login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .rm-drawer__copy {
   margin: 16px 0 0;
   text-align: center;
   color: var(--rm-muted);
   font-size: 0.78rem;
   letter-spacing: 0.02em;
+}
+
+/* ---------- "Please login" popup ---------- */
+.rm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: rm-modal-fade 0.25s ease both;
+}
+
+.rm-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 32px 32px;
+  background: #fff;
+  color: #000;
+  text-align: center;
+  font-family: var(--rm-font);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  animation: rm-modal-rise 0.35s var(--rm-ease) both;
+}
+
+.rm-modal__title {
+  margin: 0 0 10px;
+  font-family: var(--rm-logo-font);
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+
+.rm-modal__text {
+  margin: 0 0 26px;
+  color: #6b7280;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.rm-modal__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  background: #000;
+  color: #fff;
+  border: 1.5px solid #000;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.rm-modal__btn:hover,
+.rm-modal__btn:focus-visible {
+  background: #fff;
+  color: #000;
+}
+
+.rm-modal__x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f1f1;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.rm-modal__x span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  margin: -1px 0 0 -8px;
+  background: #000;
+  border-radius: 2px;
+  transition: background 0.25s ease;
+}
+
+.rm-modal__x span:nth-child(1) { transform: rotate(45deg); }
+.rm-modal__x span:nth-child(2) { transform: rotate(-45deg); }
+.rm-modal__x:hover { background: #000; }
+.rm-modal__x:hover span { background: #fff; }
+
+.rm-modal a:focus-visible,
+.rm-modal__x:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+@keyframes rm-modal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes rm-modal-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* ---------- Responsive ---------- */
@@ -390,5 +509,10 @@
   .rm-overlay,
   .rm-burger span {
     transition-duration: 0.01ms !important;
+  }
+
+  .rm-modal-overlay,
+  .rm-modal {
+    animation: none !important;
   }
 }

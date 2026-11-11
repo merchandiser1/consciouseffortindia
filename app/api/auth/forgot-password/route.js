@@ -1,0 +1,7 @@
+import { forgotPassword } from "@/app/controllers/userController";
+
+
+
+export async function POST(req) {
+  return forgotPassword(req);
+}
