@@ -173,17 +173,30 @@
 .sa .toggle:hover { color: var(--ink); background: var(--bg-soft); }
 .sa .toggle svg { display: block; }
 
+/* ---------- Main button + loading spinner ---------- */
 .sa .btn {
   margin-top: 6px; width: 100%; padding: 16px;
   border: 0; border-radius: 14px;
   background: var(--accent); color: #fff;
   font-size: 16px; font-weight: 600; letter-spacing: 0.03em;
   cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   box-shadow: 0 12px 26px rgba(0,0,0,.22);
   transition: background .2s, transform .15s;
 }
 .sa .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-.sa .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.sa .btn:disabled { opacity: .85; cursor: wait; transform: none; }
+
+/* Spinning circle shown inside the button while loading */
+.sa .spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: sa-spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes sa-spin { to { transform: rotate(360deg); } }
 
 .sa :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
@@ -275,6 +288,10 @@
   .sa .label-row { flex-wrap: wrap; }
   .sa .m-brand { font-size: 21px; letter-spacing: 0.02em; }
 }
+
+/* Reduced motion: card/brand animations off, but spinner stays (slower) so the user still sees progress */
 @media (prefers-reduced-motion: reduce) {
-  .sa *, .sa .card, .sa .m-brand { transition: none !important; animation: none !important; }
+  .sa *, .sa .card, .sa .m-brand { transition: none !important; }
+  .sa .card, .sa .m-brand { animation: none !important; }
+  .sa .spinner { animation-duration: 1.4s !important; }
 }

@@ -142,6 +142,22 @@ function PasswordInput({ id, value, onChange, placeholder, autoComplete }) {
   );
 }
 
+// Submit button: shows a spinning circle + custom text while loading
+function SubmitButton({ loading, loadingText, children }) {
+  return (
+    <button type="submit" className="btn" disabled={loading} aria-busy={loading}>
+      {loading ? (
+        <>
+          <span className="spinner" aria-hidden="true" />
+          <span>{loadingText}</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
+  );
+}
+
 function Field({ id, label, error, hint, children, extra }) {
   return (
     <div className={`field ${error ? "invalid" : ""}`}>
@@ -213,17 +229,20 @@ export default function Login() {
 
   // Runs an API action. Field-specific server errors appear under the matching
   // input; only general errors (rate limit, network, expired session) use the banner.
+  // If fn returns "keep-loading" (e.g. after a successful login), the spinner stays
+  // on until the page redirects, so the button never flips back to "Continue".
   const run = async (fn) => {
     setLoading(true);
     setServerError("");
+    let keepLoading = false;
     try {
-      await fn();
+      keepLoading = (await fn()) === "keep-loading";
     } catch (err) {
       const fe = err.fieldErrors || {};
       if (Object.keys(fe).length) setErrors((er) => ({ ...er, ...fe }));
       else setServerError(err.message);
     } finally {
-      setLoading(false);
+      if (!keepLoading) setLoading(false);
     }
   };
 
@@ -240,6 +259,7 @@ export default function Login() {
       await api("/api/auth/login", { identifier: login.identifier.trim(), password: login.password });
       router.push("/consciousmain/dashboard"); // your redirect route after login
       router.refresh();
+      return "keep-loading"; // spinner keeps going until the dashboard opens
     });
   };
 
@@ -425,9 +445,9 @@ export default function Login() {
                   autoComplete="current-password"
                   value={login.password} onChange={upd(setLogin, "password")} />
               </Field>
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? "Please wait..." : <>Continue <span aria-hidden="true">&rarr;</span></>}
-              </button>
+              <SubmitButton loading={loading} loadingText="Logging in...">
+                Continue <span aria-hidden="true">&rarr;</span>
+              </SubmitButton>
             </form>
           )}
 
@@ -453,9 +473,9 @@ export default function Login() {
                   autoComplete="new-password"
                   value={signup.confirm} onChange={upd(setSignup, "confirm")} />
               </Field>
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? "Please wait..." : <>Create Account <span aria-hidden="true">&rarr;</span></>}
-              </button>
+              <SubmitButton loading={loading} loadingText="Creating account...">
+                Create Account <span aria-hidden="true">&rarr;</span>
+              </SubmitButton>
             </form>
           )}
 
@@ -466,9 +486,9 @@ export default function Login() {
                 <input id="fpEmail" type="email" placeholder="you@example.com" autoComplete="email"
                   value={recovery.email} onChange={updRecovery("email")} />
               </Field>
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? "Please wait..." : <>Send OTP <span aria-hidden="true">&rarr;</span></>}
-              </button>
+              <SubmitButton loading={loading} loadingText="Sending code...">
+                Send OTP <span aria-hidden="true">&rarr;</span>
+              </SubmitButton>
               <div style={centered}>
                 <button type="button" className="link-btn" onClick={backToLogin}>&larr; Back to login</button>
               </div>
@@ -484,9 +504,9 @@ export default function Login() {
                   autoComplete="one-time-code" maxLength={6} placeholder="••••••"
                   value={recovery.otp} onChange={updRecovery("otp")} />
               </Field>
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? "Please wait..." : <>Verify OTP <span aria-hidden="true">&rarr;</span></>}
-              </button>
+              <SubmitButton loading={loading} loadingText="Verifying...">
+                Verify OTP <span aria-hidden="true">&rarr;</span>
+              </SubmitButton>
               <div style={{ ...centered, display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <button type="button" className="link-btn" onClick={handleResend}
                   disabled={remaining > 0 || loading}>
@@ -513,9 +533,9 @@ export default function Login() {
                   autoComplete="new-password"
                   value={recovery.confirm} onChange={updRecovery("confirm")} />
               </Field>
-              <button type="submit" className="btn" disabled={loading}>
-                {loading ? "Please wait..." : <>Update Password <span aria-hidden="true">&rarr;</span></>}
-              </button>
+              <SubmitButton loading={loading} loadingText="Updating password...">
+                Update Password <span aria-hidden="true">&rarr;</span>
+              </SubmitButton>
               <div style={centered}>
                 <button type="button" className="link-btn" onClick={backToLogin}>&larr; Back to login</button>
               </div>
