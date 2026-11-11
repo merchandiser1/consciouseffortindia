@@ -334,7 +334,7 @@ export default function Nav() {
               Login
             </Link>
           )}
-          <p className="rm-drawer__copy">© 2026 {BRAND_TITLE}</p>
+          <p className="rm-drawer__copy">© 2017 {BRAND_TITLE}</p>
         </div>
       </aside>
 
