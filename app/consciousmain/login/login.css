@@ -1,0 +1,265 @@
+/* Conscious Effort – Login / Sign Up (white + black)
+   Fonts: ONLY Playfair Display (headings / brand) + Gill Sans (everything else).
+   Everything is scoped inside .sa, so it won't affect the rest of the app. */
+
+.sa {
+  --bg-soft: #f4f4f5;
+  --ink: #0a0a0a;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #0a0a0a;
+  --accent-hover: #262626;
+  --danger: #dc2626;
+  --success: #166534;
+
+  /* Playfair Display: loaded in login.jsx via next/font */
+  --sa-serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  /* Gill Sans: system font stack (Mac/iOS: Gill Sans, Windows/Office: Gill Sans MT) */
+  --sa-sans: "Gill Sans", "Gill Sans MT", "Gill Sans Nova", Calibri, sans-serif;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  font-family: var(--sa-sans);
+  color: var(--ink);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+.sa *, .sa *::before, .sa *::after { box-sizing: border-box; }
+.sa h1, .sa h2, .sa h3, .sa p { margin: 0; }
+.sa a { color: inherit; text-decoration: none; }
+.sa button, .sa input { font-family: inherit; }
+
+/* ---------- LEFT (image, desktop only) ---------- */
+.sa-left {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* The image is a CSS background: when .sa-left is hidden (mobile), the browser
+     doesn't download the image at all. If the image is missing, the gradient shows. */
+  background:
+    url("/login-image.png") center / cover no-repeat,
+    linear-gradient(135deg, #0a0a0a, #3f3f46);
+  overflow: hidden;
+}
+.sa .left-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0) 35%);
+  pointer-events: none;
+}
+.sa .left-top {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 32px 40px;
+}
+.sa .back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: #fff; color: var(--ink);
+  font-weight: 600; font-size: 15px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  transition: transform .15s ease;
+}
+.sa .back-btn:hover { transform: translateX(-2px); }
+
+/* Mobile header is hidden on desktop */
+.sa .m-top { display: none; }
+
+/* ---------- RIGHT ---------- */
+.sa-right {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 28px; background: var(--bg-soft);
+}
+.sa .card {
+  width: 100%; max-width: 470px; background: #fff;
+  border-radius: 28px; padding: 42px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.08);
+}
+.sa .eyebrow {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 1.8px; text-transform: uppercase;
+}
+
+/* Heading: Playfair Display */
+.sa .card h2 {
+  margin-top: 14px;
+  font-family: var(--sa-serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.sa .sub { margin-top: 10px; color: var(--muted); font-size: 16px; }
+.sa .sub.spaced { margin-bottom: 22px; }
+
+.sa .tabs {
+  margin: 26px 0 22px; display: grid; grid-template-columns: 1fr 1fr;
+  padding: 5px; background: var(--bg-soft); border-radius: 14px;
+}
+.sa .tab {
+  border: 0; background: transparent; padding: 12px; border-radius: 10px;
+  font-size: 15px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all .2s ease;
+}
+.sa .tab.active { background: #fff; color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+
+.sa .server-error {
+  margin-bottom: 16px; padding: 12px 14px; border-radius: 12px;
+  background: #fef2f2; color: var(--danger); font-size: 14px;
+}
+.sa .server-success {
+  margin-bottom: 16px; padding: 12px 14px; border-radius: 12px;
+  background: #f0fdf4; color: var(--success); font-size: 14px;
+}
+
+.sa .form { display: flex; flex-direction: column; gap: 18px; }
+.sa .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.sa .field label { font-size: 14px; font-weight: 600; }
+.sa .link { font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.sa .link-btn {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.sa .link-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.sa .field input {
+  width: 100%; padding: 15px 18px;
+  border: 1px solid var(--line); border-radius: 14px;
+  font-size: 15px; color: var(--ink); background: #fff; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sa .field input::placeholder { color: #9ca3af; }
+.sa .field input:focus { border-color: var(--ink); box-shadow: 0 0 0 4px rgba(0,0,0,.07); }
+.sa .field.invalid input { border-color: var(--danger); }
+.sa .err { display: block; margin-top: 6px; font-size: 13px; color: var(--danger); }
+.sa .hint { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+/* OTP input (forgot password) */
+.sa .field input.otp-input {
+  text-align: center; letter-spacing: 10px; font-size: 22px; font-weight: 700;
+}
+
+/* ---------- Password eye toggle ---------- */
+.sa .pass-wrap { position: relative; }
+.sa .pass-wrap input { padding-right: 56px; }
+.sa .toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border: 0; border-radius: 50%;
+  background: none; cursor: pointer;
+  color: var(--muted);
+  -webkit-tap-highlight-color: transparent;
+  transition: color .2s ease, background .2s ease;
+}
+.sa .toggle:hover { color: var(--ink); background: var(--bg-soft); }
+.sa .toggle svg { display: block; }
+
+.sa .btn {
+  margin-top: 6px; width: 100%; padding: 16px;
+  border: 0; border-radius: 14px;
+  background: var(--accent); color: #fff;
+  font-size: 16px; font-weight: 600; letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(0,0,0,.22);
+  transition: background .2s, transform .15s;
+}
+.sa .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.sa .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+.sa :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  .sa .left-top { padding: 24px; }
+}
+
+/* MOBILE + TABLET PORTRAIT: image hidden, brand text on top */
+@media (max-width: 860px) {
+  .sa { grid-template-columns: 1fr; }
+  .sa-left { display: none; }
+
+  .sa-right {
+    position: relative;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: clamp(18px, 4vh, 30px);
+    padding:
+      max(20px, env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right))
+      max(40px, env(safe-area-inset-bottom))
+      max(18px, env(safe-area-inset-left));
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+  /* Subtle dot grid for a premium feel */
+  .sa-right::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(10,10,10,.13) 1px, transparent 1.2px);
+    background-size: 24px 24px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 45% at 50% 12%, #000 10%, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 45% at 50% 12%, #000 10%, transparent 75%);
+    pointer-events: none;
+  }
+
+  .sa .m-top {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 470px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: clamp(14px, 3vh, 22px);
+  }
+  .sa .m-top .back-btn {
+    align-self: flex-start;
+    padding: 9px 16px; font-size: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  }
+
+  /* Brand: Playfair Display */
+  .sa .m-brand {
+    font-family: var(--sa-serif);
+    font-size: clamp(24px, 7vw, 38px);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+    animation: sa-fade .6s ease both;
+  }
+
+  .sa .card {
+    position: relative; z-index: 1;
+    padding: 32px 28px;
+    animation: sa-rise .6s cubic-bezier(.2,.7,.2,1) .05s both;
+  }
+  .sa .field input { font-size: 16px; } /* prevents zoom on focus on iPhone */
+}
+
+@keyframes sa-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes sa-fade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 480px) {
+  .sa .card { padding: 26px 20px; border-radius: 22px; }
+  .sa .card h2 { font-size: 27px; }
+  .sa .form { gap: 16px; }
+  .sa .field input { padding: 14px 16px; }
+  .sa .pass-wrap input { padding-right: 52px; }
+}
+@media (max-width: 340px) {
+  .sa .label-row { flex-wrap: wrap; }
+  .sa .m-brand { font-size: 21px; letter-spacing: 0.02em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa *, .sa .card, .sa .m-brand { transition: none !important; animation: none !important; }
+}
