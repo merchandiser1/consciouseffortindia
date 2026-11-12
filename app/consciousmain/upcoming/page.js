@@ -184,6 +184,14 @@ export default function Upcoming() {
       return setError("Please fill name, email, phone and brand name.");
     }
 
+    if (!catalogue) {
+      return setError("Please upload your catalogue (PDF).");
+    }
+
+    if (images.length === 0) {
+      return setError("Please upload at least one image.");
+    }
+
     // UI only: backend / API call yahan baad mein add hoga
     setDone(true);
   };
@@ -426,8 +434,7 @@ export default function Upcoming() {
 
                   <div className={styles.field}>
                     <span className={styles.label}>
-                      Upload Catalogue / Lookbook (PDF){" "}
-                      <span className={styles.optional}>(optional)</span>
+                      Upload Catalogue / Lookbook (PDF) *
                     </span>
 
                     <label htmlFor="u-cat-file" className={styles.upload}>
@@ -457,8 +464,7 @@ export default function Upcoming() {
 
                   <div className={styles.field}>
                     <span className={styles.label}>
-                      Upload Images (max {MAX_IMAGES}){" "}
-                      <span className={styles.optional}>(optional)</span>
+                      Upload Images (1 to {MAX_IMAGES}) *
                     </span>
 
                     {images.length < MAX_IMAGES && (
