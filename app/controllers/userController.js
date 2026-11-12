@@ -114,8 +114,11 @@ export async function logout() {
 export async function me() {
   try {
     const user = await getAuthUser();
-    if (!user) return fail("Not authenticated", 401);
-    return ok("Authenticated", { user });
+
+    // Logged out is a normal state, not an error: 200 so no 401 shows in the terminal / console
+    if (!user) return ok("Not authenticated", { authenticated: false });
+
+    return ok("Authenticated", { authenticated: true, user });
   } catch (err) {
     console.error("[me]", err);
     return serverError();

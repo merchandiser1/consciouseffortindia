@@ -87,8 +87,10 @@ export default function Nav() {
         cache: "no-store",
         credentials: "same-origin",
       });
-      setAuthed(res.ok);
-      return res.ok;
+      const data = await res.json().catch(() => ({}));
+      const ok = res.ok && data.authenticated === true;
+      setAuthed(ok);
+      return ok;
     } catch {
       return false; // network error: keep whatever the button shows now
     }
@@ -334,7 +336,7 @@ export default function Nav() {
               Login
             </Link>
           )}
-          <p className="rm-drawer__copy">© 2017 {BRAND_TITLE}</p>
+          <p className="rm-drawer__copy">© 2026 {BRAND_TITLE}</p>
         </div>
       </aside>
 
