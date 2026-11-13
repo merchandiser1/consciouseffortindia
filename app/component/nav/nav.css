@@ -82,6 +82,10 @@
   white-space: nowrap;
 }
 
+.upcoming,
+.past {
+  scroll-margin-top: 30px;
+}
 .rm-nav__link::after {
   content: "";
   position: absolute;

@@ -30,13 +30,18 @@ const LOGO_URL =
 const LOGIN_HREF = "/consciousmain/login";
 const DASHBOARD_HREF = "/consciousmain/dashboard";
 
+// Delay so the mobile drawer can close (and unlock body scroll) first
+const DRAWER_CLOSE_MS = 280;
+
 const LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Upcoming Events", href: "/upcoming-events" },
-  { label: "Previous Events", href: "/previous-events" },
+  { label: "Home", href: "/", top: true },
+  { label: "Upcoming Events", href: "/#upcoming", hash: "upcoming" },
+  { label: "Previous Events", href: "/#previous", hash: "previous" },
   { label: "About", href: "/about" },
   { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
 ];
+
+const SECTION_IDS = ["upcoming", "previous"];
 
 /* ------------------------------------------------------------------
    AUTH CHECK (module level => shared by ALL Nav instances)
@@ -121,6 +126,7 @@ export default function Nav() {
   const [primary, setPrimary] = useState(true);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
 
   // Button is ALWAYS visible: shows "Login" by default,
   // turns into "Logout" as soon as the server confirms a session.
@@ -130,10 +136,94 @@ export default function Nav() {
 
   const close = useCallback(() => setOpen(false), []);
 
-  // The Home link is never shown as active
-  const isActive = (href) => {
-    if (href === "/") return false;
-    return pathname.startsWith(href);
+  // Active link logic:
+  // - Home is never shown as active
+  // - section links (#upcoming / #previous) are active while that section is on screen
+  // - other links are active when the path matches
+  const isActive = (link) => {
+    if (link.top) return false;
+    if (link.hash) return pathname === "/" && activeSection === link.hash;
+    return pathname.startsWith(link.href);
+  };
+
+  // Smooth scrolling for the whole site (also covers hash navigation from other pages)
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.scrollBehavior;
+    html.style.scrollBehavior = "smooth";
+    return () => {
+      html.style.scrollBehavior = prev;
+    };
+  }, []);
+
+  // Highlight the nav link of the section currently in the middle of the screen
+  useEffect(() => {
+    if (pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const els = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      Boolean
+    );
+    if (!els.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.id;
+          if (entry.isIntersecting) {
+            setActiveSection(id);
+          } else {
+            setActiveSection((cur) => (cur === id ? "" : cur));
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [pathname]);
+
+  // Click on "Upcoming Events" / "Previous Events"
+  const onHashClick = (e, id) => {
+    e.preventDefault();
+    const wasOpen = open;
+    close();
+
+    // On another page: go home with the hash (browser scrolls to the section)
+    if (pathname !== "/") {
+      router.push(`/#${id}`);
+      return;
+    }
+
+    // Already on home: smooth scroll
+    setTimeout(
+      () => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.replaceState(null, "", `/#${id}`);
+      },
+      wasOpen ? DRAWER_CLOSE_MS : 0
+    );
+  };
+
+  // Click on "Home": if already on home, smooth scroll to top
+  const onHomeClick = (e) => {
+    const wasOpen = open;
+    close();
+    if (pathname !== "/") return; // normal navigation to "/"
+
+    e.preventDefault();
+    setTimeout(
+      () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.replaceState(null, "", "/");
+      },
+      wasOpen ? DRAWER_CLOSE_MS : 0
+    );
   };
 
   // Ask the server (deduped + throttled) if the cookie is a valid session
@@ -181,6 +271,14 @@ export default function Nav() {
     const ok = await refreshAuth(true); // session may have just changed
     if (ok) router.push(DASHBOARD_HREF);
     else setLoginPrompt(true);
+  };
+
+  // Picks the right click handler for each link
+  const handlerFor = (l) => {
+    if (l.protected) return onProtectedClick;
+    if (l.hash) return (e) => onHashClick(e, l.hash);
+    if (l.top) return onHomeClick;
+    return close;
   };
 
   // Tap on "Logout": clear the cookie, then reload so every page forgets the session
@@ -271,9 +369,10 @@ export default function Nav() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  onClick={l.protected ? onProtectedClick : undefined}
-                  className={`rm-nav__link ${isActive(l.href) ? "is-active" : ""}`}
-                  aria-current={isActive(l.href) ? "page" : undefined}
+                  scroll={!l.hash}
+                  onClick={handlerFor(l)}
+                  className={`rm-nav__link ${isActive(l) ? "is-active" : ""}`}
+                  aria-current={isActive(l) ? "page" : undefined}
                 >
                   {l.label}
                 </Link>
@@ -357,9 +456,10 @@ export default function Nav() {
             <Link
               key={l.href}
               href={l.href}
-              className={`rm-drawer__link ${isActive(l.href) ? "is-active" : ""}`}
+              scroll={!l.hash}
+              className={`rm-drawer__link ${isActive(l) ? "is-active" : ""}`}
               tabIndex={open ? 0 : -1}
-              onClick={l.protected ? onProtectedClick : close}
+              onClick={handlerFor(l)}
             >
               <span>{l.label}</span>
               <Arrow />
