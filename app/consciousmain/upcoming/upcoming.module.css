@@ -893,3 +893,134 @@
   }
 
 }
+
+
+
+
+
+/* =========================================================
+   PASTE THIS AT THE VERY END OF upcoming.module.css
+   (submit loading state + success popup)
+   ========================================================= */
+
+/* ---------- Disabled / submitting button ---------- */
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn:disabled::before {
+  transform: translateY(101%);
+}
+
+.btn:disabled:hover {
+  color: #fff;
+}
+
+.btn:disabled:hover .arrow {
+  transform: none;
+}
+
+/* ---------- Success popup ---------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: modalFade 0.25s ease both;
+}
+
+.modal {
+  width: 100%;
+  max-width: 460px;
+  padding: 40px 32px 34px;
+  background: #fff;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.18),
+    0 30px 80px rgba(0, 0, 0, 0.25);
+  animation: modalPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.modalIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+}
+
+.modalTitle {
+  margin: 0 0 14px;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 5vw, 2.2rem);
+  line-height: 1.15;
+  color: #000;
+}
+
+.modalText {
+  margin: 0 0 28px;
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: var(--muted, #555);
+}
+
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.modalActions .btn {
+  min-width: 200px;
+}
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 32px 22px 28px;
+  }
+
+  .modalActions .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modal {
+    animation: none;
+  }
+}

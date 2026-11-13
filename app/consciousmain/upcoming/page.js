@@ -18,7 +18,14 @@ const poppins = Poppins({
 });
 
 const EVENT_TITLE = "#ConsciousEffort India, Hyderabad";
+
+/* Limits (server checks the same things again) */
 const MAX_IMAGES = 5;
+const MAX_IMAGE_MB = 5;
+const MAX_PDF_MB = 10;
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const highlights = [
   "Founded in 2017",
@@ -95,6 +102,22 @@ const ArrowIcon = () => (
   </svg>
 );
 
+const CheckIcon = () => (
+  <svg
+    width="30"
+    height="30"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </svg>
+);
+
 const Leaf = ({ className }) => (
   <svg
     className={className}
@@ -124,8 +147,14 @@ export default function Upcoming() {
   const [form, setForm] = useState(emptyForm);
   const [catalogue, setCatalogue] = useState(null);
   const [images, setImages] = useState([]);
-  const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [catError, setCatError] = useState(""); // shown right under the PDF box
+  const [imgError, setImgError] = useState(""); // shown right under the images box
+  const [submitting, setSubmitting] = useState(false);
+
+  // success popup
+  const [showModal, setShowModal] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
 
   const previews = useMemo(
     () => images.map((f) => ({ name: f.name, url: URL.createObjectURL(f) })),
@@ -135,6 +164,19 @@ export default function Upcoming() {
   useEffect(() => {
     return () => previews.forEach((p) => URL.revokeObjectURL(p.url));
   }, [previews]);
+
+  // Popup: lock page scroll + close on Esc
+  useEffect(() => {
+    if (!showModal) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => e.key === "Escape" && setShowModal(false);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [showModal]);
 
   const onChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -146,9 +188,14 @@ export default function Upcoming() {
     if (!f) return;
 
     if (f.type !== "application/pdf") {
-      return setError("Catalogue must be a PDF file.");
+      return setCatError("Only PDF files are allowed for the catalogue.");
     }
-    setError("");
+    if (f.size > MAX_PDF_MB * 1024 * 1024) {
+      return setCatError(
+        `This file is too large (${formatSize(f.size)}). Only PDF files up to ${MAX_PDF_MB} MB are allowed.`
+      );
+    }
+    setCatError("");
     setCatalogue(f);
   };
 
@@ -157,13 +204,19 @@ export default function Upcoming() {
     e.target.value = "";
     if (!picked.length) return;
 
-    if (picked.some((f) => !f.type.startsWith("image/"))) {
-      return setError("Only image files are allowed.");
+    if (picked.some((f) => !IMAGE_TYPES.includes(f.type))) {
+      return setImgError("Only JPG, PNG or WebP images are allowed.");
+    }
+    const tooBig = picked.find((f) => f.size > MAX_IMAGE_MB * 1024 * 1024);
+    if (tooBig) {
+      return setImgError(
+        `"${tooBig.name}" is too large (${formatSize(tooBig.size)}). Each image can be up to ${MAX_IMAGE_MB} MB.`
+      );
     }
     if (images.length + picked.length > MAX_IMAGES) {
-      return setError(`You can upload a maximum of ${MAX_IMAGES} images.`);
+      return setImgError(`You can upload a maximum of ${MAX_IMAGES} images.`);
     }
-    setError("");
+    setImgError("");
     setImages((p) => [...p, ...picked]);
   };
 
@@ -171,37 +224,70 @@ export default function Upcoming() {
     setImages((p) => p.filter((_, idx) => idx !== i));
   };
 
-  const onSubmit = (e) => {
+  const resetForm = () => {
+    setForm(emptyForm);
+    setCatalogue(null);
+    setImages([]);
+    setError("");
+    setCatError("");
+    setImgError("");
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setError("");
 
-    if (
-      !form.name.trim() ||
-      !form.email.trim() ||
-      !form.phone.trim() ||
-      !form.brand.trim()
-    ) {
+    const v = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      brand: form.brand.trim(),
+      website: form.website.trim(),
+      message: form.message.trim(),
+    };
+
+    if (!v.name || !v.email || !v.phone || !v.brand) {
       return setError("Please fill name, email, phone and brand name.");
     }
-
+    if (!EMAIL_RE.test(v.email)) {
+      return setError("Please enter a valid email address.");
+    }
+    const digits = v.phone.replace(/\D/g, "");
+    if (digits.length < 8 || digits.length > 15) {
+      return setError("Please enter a valid phone number.");
+    }
     if (!catalogue) {
       return setError("Please upload your catalogue (PDF).");
     }
-
     if (images.length === 0) {
       return setError("Please upload at least one image.");
     }
 
-    // UI only: backend / API call yahan baad mein add hoga
-    setDone(true);
-  };
+    setSubmitting(true);
+    try {
+      const fd = new FormData();
+      Object.entries(v).forEach(([k, val]) => fd.append(k, val));
+      fd.append("catalogue", catalogue);
+      images.forEach((img) => fd.append("images", img));
 
-  const reset = () => {
-    setForm(emptyForm);
-    setCatalogue(null);
-    setImages([]);
-    setDone(false);
-    setError("");
+      const res = await fetch("/api/applications", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success) {
+        setError(data.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      // Success: remember first name, clear the form, open the popup
+      setSubmittedName(v.name.split(" ")[0]);
+      resetForm();
+      setShowModal(true);
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -328,8 +414,8 @@ export default function Upcoming() {
                 <p className={styles.panelLabel}>Keep ready</p>
                 <ul className={styles.panelList}>
                   <li>Brand name &amp; brand story</li>
-                  <li>Catalogue / lookbook (PDF)</li>
-                  <li>Images of your collection</li>
+                  <li>Catalogue / lookbook (PDF, up to {MAX_PDF_MB} MB)</li>
+                  <li>Images of your collection (up to {MAX_IMAGES})</li>
                   <li>Website &amp; social media links</li>
                 </ul>
 
@@ -339,29 +425,6 @@ export default function Upcoming() {
               </aside>
 
               <div className={styles.formSide}>
-              {done ? (
-                <div className={styles.success}>
-                  <h3 className={styles.cardTitle}>Application Received</h3>
-                  <p className={styles.cardDesc}>
-                    Thank you, {form.name.split(" ")[0]}. Our team will review
-                    your application for <strong>{EVENT_TITLE}</strong> and get
-                    in touch shortly.
-                  </p>
-                  <div className={styles.successActions}>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${poppins.className}`}
-                      onClick={reset}
-                    >
-                      <span className={styles.btnText}>Submit Another</span>
-                      <ArrowIcon />
-                    </button>
-                    <Link href="/" className={styles.backLink}>
-                      Back to home
-                    </Link>
-                  </div>
-                </div>
-              ) : (
                 <form className={styles.form} onSubmit={onSubmit} noValidate>
                   <div className={styles.row}>
                     <div className={styles.field}>
@@ -373,6 +436,7 @@ export default function Upcoming() {
                         onChange={onChange}
                         placeholder="Enter your full name"
                         autoComplete="name"
+                        maxLength={100}
                       />
                     </div>
 
@@ -386,6 +450,7 @@ export default function Upcoming() {
                         onChange={onChange}
                         placeholder="Enter your email"
                         autoComplete="email"
+                        maxLength={254}
                       />
                     </div>
                   </div>
@@ -401,6 +466,7 @@ export default function Upcoming() {
                         onChange={onChange}
                         placeholder="+91 00000 00000"
                         autoComplete="tel"
+                        maxLength={20}
                       />
                     </div>
 
@@ -412,6 +478,7 @@ export default function Upcoming() {
                         value={form.brand}
                         onChange={onChange}
                         placeholder="Your brand name"
+                        maxLength={120}
                       />
                     </div>
                   </div>
@@ -428,6 +495,7 @@ export default function Upcoming() {
                         value={form.website}
                         onChange={onChange}
                         placeholder="@yourbrand or website link"
+                        maxLength={200}
                       />
                     </div>
                   </div>
@@ -440,7 +508,7 @@ export default function Upcoming() {
                     <label htmlFor="u-cat-file" className={styles.upload}>
                       {catalogue
                         ? `📄 ${catalogue.name} (${formatSize(catalogue.size)})`
-                        : "Click to upload catalogue PDF"}
+                        : `Click to upload catalogue PDF (max ${MAX_PDF_MB} MB)`}
                     </label>
 
                     <input
@@ -460,6 +528,12 @@ export default function Upcoming() {
                         Remove catalogue
                       </button>
                     )}
+
+                    {catError && (
+                      <p className={styles.error} role="alert">
+                        {catError}
+                      </p>
+                    )}
                   </div>
 
                   <div className={styles.field}>
@@ -470,12 +544,13 @@ export default function Upcoming() {
                     {images.length < MAX_IMAGES && (
                       <>
                         <label htmlFor="u-images" className={styles.upload}>
-                          Click to add images ({images.length}/{MAX_IMAGES})
+                          Click to add images ({images.length}/{MAX_IMAGES}) · JPG,
+                          PNG or WebP, up to {MAX_IMAGE_MB} MB each
                         </label>
                         <input
                           id="u-images"
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp"
                           multiple
                           onChange={onImages}
                           hidden
@@ -500,6 +575,12 @@ export default function Upcoming() {
                         ))}
                       </div>
                     )}
+
+                    {imgError && (
+                      <p className={styles.error} role="alert">
+                        {imgError}
+                      </p>
+                    )}
                   </div>
 
                   <div className={styles.field}>
@@ -514,26 +595,76 @@ export default function Upcoming() {
                       value={form.message}
                       onChange={onChange}
                       placeholder="Your brand story, craft and collection..."
+                      maxLength={2000}
                     />
                   </div>
 
-                  {error && <p className={styles.error}>{error}</p>}
+                  {error && (
+                    <p className={styles.error} role="alert">
+                      {error}
+                    </p>
+                  )}
 
                   <button
                     type="submit"
+                    disabled={submitting}
                     className={`${styles.btn} ${styles.submit} ${poppins.className}`}
                   >
-                    <span className={styles.btnText}>Submit Application</span>
-                    <ArrowIcon />
+                    <span className={styles.btnText}>
+                      {submitting ? "Submitting..." : "Submit Application"}
+                    </span>
+                    {!submitting && <ArrowIcon />}
                   </button>
-
                 </form>
-              )}
               </div>
             </div>
           </div>
         </section>
       </main>
+
+      {/* ================= SUCCESS POPUP ================= */}
+      {showModal && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className={`${styles.modal} ${cabin.className}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="apply-done-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalIcon}>
+              <CheckIcon />
+            </div>
+
+            <h3 id="apply-done-title" className={styles.modalTitle}>
+              Application Submitted
+            </h3>
+
+            <p className={styles.modalText}>
+              Thank you{submittedName ? `, ${submittedName}` : ""}. Your
+              application for <strong>{EVENT_TITLE}</strong> has been submitted
+              successfully. Our team will review it and respond to you shortly.
+            </p>
+
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${poppins.className}`}
+                onClick={() => setShowModal(false)}
+                autoFocus
+              >
+                <span className={styles.btnText}>Done</span>
+              </button>
+              <Link href="/" className={styles.backLink}>
+                Back to home
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

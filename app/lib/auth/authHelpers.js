@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, connection } from "next/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import mongoose from "mongoose";
@@ -86,6 +86,7 @@ export function clearAuthCookie(res) {
 
 /* ---------- current user (server-side, full check incl. DB) ---------- */
 export async function getAuthUser() {
+  await connection(); // request-time kaam hai, prerender mat karo
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) return null;

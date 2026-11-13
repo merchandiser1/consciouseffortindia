@@ -38,6 +38,62 @@ const LINKS = [
   { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
 ];
 
+/* ------------------------------------------------------------------
+   AUTH CHECK (module level => shared by ALL Nav instances)
+   - in-flight dedupe: only one request at a time
+   - burst guard: no new request within 2s of the last one
+   - logged-in cache: no new request within 30s if user is authed
+   - logged-out is NOT cached long, so right after login it re-checks
+------------------------------------------------------------------- */
+const BURST_GAP_MS = 2000;
+const AUTHED_CACHE_MS = 30000;
+
+let inFlight = null;
+let lastResult = false;
+let lastAt = 0;
+
+async function checkAuth(force = false) {
+  // Someone already asking the server -> reuse that same request
+  if (inFlight) return inFlight;
+
+  if (!force) {
+    const age = Date.now() - lastAt;
+    if (age < BURST_GAP_MS) return lastResult;
+    if (lastResult === true && age < AUTHED_CACHE_MS) return lastResult;
+  }
+
+  inFlight = (async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        cache: "no-store",
+        credentials: "same-origin",
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.authenticated === true) {
+        lastResult = true;
+      } else if (res.status === 401 || data.authenticated === false) {
+        lastResult = false; // server clearly says: no session
+      }
+      // any other error (500, timeout, bad JSON): keep the previous state
+
+      lastAt = Date.now();
+      return lastResult;
+    } catch {
+      return lastResult; // network error: keep previous state
+    } finally {
+      inFlight = null;
+    }
+  })();
+
+  return inFlight;
+}
+
+function resetAuthCache(value = false) {
+  lastResult = value;
+  lastAt = 0;
+}
+
 function Arrow() {
   return (
     <svg
@@ -80,47 +136,49 @@ export default function Nav() {
     return pathname.startsWith(href);
   };
 
-  // Ask the server if the cookie is a valid session
-  const refreshAuth = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/me", {
-        cache: "no-store",
-        credentials: "same-origin",
-      });
-      const data = await res.json().catch(() => ({}));
-      const ok = res.ok && data.authenticated === true;
-      setAuthed(ok);
-      return ok;
-    } catch {
-      return false; // network error: keep whatever the button shows now
-    }
+  // Ask the server (deduped + throttled) if the cookie is a valid session
+  const refreshAuth = useCallback(async (force = false) => {
+    const ok = await checkAuth(force);
+    setAuthed(ok);
+    return ok;
   }, []);
 
-  // Re-check on first load and after every page change (covers login / logout)
+  // Safety: if <Nav /> gets rendered twice, only the first one is shown
   useEffect(() => {
+    const all = document.querySelectorAll("[data-rm-nav]");
+    setPrimary(all[0] === rootRef.current);
+  }, [pathname]);
+
+  // Re-check on first load and after every page change (covers login / logout)
+  // Only the visible (primary) Nav does this.
+  useEffect(() => {
+    if (!primary) return;
     refreshAuth();
-  }, [pathname, refreshAuth]);
+  }, [pathname, primary, refreshAuth]);
 
   // Re-check when the tab becomes active again / page restored from back button
   useEffect(() => {
-    const onVisible = () => document.visibilityState === "visible" && refreshAuth();
-    const onShow = () => refreshAuth();
+    if (!primary) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refreshAuth();
+    };
+    const onShow = (e) => {
+      if (e.persisted) refreshAuth(true); // only for bfcache restore
+    };
     document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("focus", onShow);
     window.addEventListener("pageshow", onShow);
     return () => {
       document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("focus", onShow);
       window.removeEventListener("pageshow", onShow);
     };
-  }, [refreshAuth]);
+  }, [primary, refreshAuth]);
 
   // Dashboard link: logged in => normal navigation, otherwise show the popup
   const onProtectedClick = async (e) => {
     close();
     if (authed) return; // let <Link> navigate
     e.preventDefault();
-    const ok = await refreshAuth(); // re-check, session may have just changed
+    const ok = await refreshAuth(true); // session may have just changed
     if (ok) router.push(DASHBOARD_HREF);
     else setLoginPrompt(true);
   };
@@ -136,21 +194,16 @@ export default function Nav() {
         credentials: "same-origin",
       });
       if (!res.ok) throw new Error("logout failed");
+      resetAuthCache(false);
       setAuthed(false); // button turns back into "Login" immediately
       window.location.replace(
         pathname.startsWith(DASHBOARD_HREF) ? LOGIN_HREF : pathname
       );
     } catch {
       setLoggingOut(false);
-      await refreshAuth(); // logout failed: show the real state
+      await refreshAuth(true); // logout failed: show the real state
     }
   };
-
-  // Safety: if <Nav /> gets rendered twice, only the first one is shown
-  useEffect(() => {
-    const all = document.querySelectorAll("[data-rm-nav]");
-    setPrimary(all[0] === rootRef.current);
-  }, [pathname]);
 
   // Close the drawer on route change
   useEffect(() => {

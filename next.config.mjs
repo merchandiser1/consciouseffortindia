@@ -1,12 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  experimental: {
-    agentFeedback: true,
+  // ...tera jo bhi pehle se hai (cacheComponents etc.) wahi rehne de
+
+  async redirects() {
+    return [
+      {
+        source: "/consciousmain/dashboard",
+        destination: "/consciousmain/dashboard/applications",
+        permanent: false, // false = 307, browser cache nahi karega
+      },
+    ];
   },
-  cacheComponents: true,
-  partialPrefetching: true,
-  reactCompiler: true,
 };
 
-export default nextConfig;
+export default nextConfig; // ya module.exports = nextConfig, jo tere file me hai

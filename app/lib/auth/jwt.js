@@ -6,7 +6,7 @@ export const COOKIE_NAME = "ce_token";
 // Where your login page lives (URL). Change here if the route changes.
 export const LOGIN_PATH = "/consciousmain/login";
 // Where users land after a successful login (and where logged-in users get sent from the login page).
-export const DASHBOARD_PATH = "/consciousmain/dashboard";
+export const DASHBOARD_PATH = "/consciousmain/dashboard/applications";
 
 const DEFAULT_EXPIRY = "7d";
 const UNITS = { s: 1, m: 60, h: 3600, d: 86400 };
@@ -37,12 +37,16 @@ export async function signToken({ userId, tokenVersion }) {
     .sign(secretKey());
 }
 
-// Returns payload or null (never throws)
+// Returns payload or null (invalid/expired token never throws).
 export async function verifyToken(token) {
+  const key = secretKey(); // outside try: a missing/short JWT_SECRET must be visible, not silently "logged out"
   try {
-    const { payload } = await jwtVerify(token, secretKey(), { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
     return payload;
-  } catch {
+  } catch (e) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("verifyToken failed:", e.code || e.name);
+    }
     return null;
   }
 }
