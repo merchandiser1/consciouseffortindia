@@ -1,0 +1,28 @@
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.stat { padding: 22px; background: #fff; border: 1px solid var(--line); border-radius: 18px; }
+
+.tile {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; margin-bottom: 18px; border-radius: 12px;
+}
+.tTotal { background: #f1e9e0; color: #6b5a48; }
+.tReview { background: #fff1d6; color: #b9770e; }
+.tOk { background: #e3f4e8; color: #1d6a39; }
+.tBad { background: #fde8e8; color: #c0392b; }
+.tPay { background: #e4edfb; color: #2f62b8; }
+
+.label { margin: 0 0 6px; font-size: 14.5px; color: var(--muted); }
+.value {
+  margin: 0; font-family: var(--font-serif), Georgia, serif; font-weight: 600;
+  font-size: 2.3rem; line-height: 1.1; color: var(--ink);
+}
+
+.recent { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .recent { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) {
+  .grid { gap: 12px; }
+  .stat { padding: 16px; }
+  .value { font-size: 1.8rem; }
+}

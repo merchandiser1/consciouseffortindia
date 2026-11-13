@@ -182,6 +182,25 @@ export default function Upcoming() {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
 
+  /* Smooth scroll to the apply form (respects "reduce motion") */
+  const scrollToApply = (e) => {
+    e.preventDefault();
+    const el = document.getElementById("apply");
+    if (!el) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    el.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+
+    // show #apply in the URL without jumping
+    history.replaceState(null, "", "#apply");
+  };
+
   const onCatalogue = (e) => {
     const f = e.target.files?.[0];
     e.target.value = "";
@@ -342,7 +361,11 @@ export default function Upcoming() {
             </ul>
 
             <div className={styles.fade} style={{ "--d": "0.5s" }}>
-              <a href="#apply" className={`${styles.btn} ${poppins.className}`}>
+              <a
+                href="#apply"
+                onClick={scrollToApply}
+                className={`${styles.btn} ${poppins.className}`}
+              >
                 <span className={styles.btnText}>Apply for the Event</span>
                 <ArrowIcon />
               </a>

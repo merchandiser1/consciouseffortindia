@@ -316,7 +316,7 @@
    APPLY
    ========================================================= */
 .apply {
-  scroll-margin-top: var(--nav);
+  scroll-margin-top: 80px;
   background: linear-gradient(#fff, var(--ivory) 70%);
   padding: clamp(36px, 4.5vw, 56px) 24px clamp(64px, 7vw, 96px);
 }
