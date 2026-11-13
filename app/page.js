@@ -168,7 +168,7 @@ export default function Home() {
             </p>
 
             <div className={`${styles.actions} ${styles.fade}`} style={{ "--d": "0.65s" }}>
-              <Link href="/upcoming" className={`${styles.btn} ${poppins.className}`}>
+              <Link href="/consciousmain/upcoming" className={`${styles.btn} ${poppins.className}`}>
                 <span className={styles.btnText}>Apply for the Event</span>
                 <ArrowIcon />
               </Link>

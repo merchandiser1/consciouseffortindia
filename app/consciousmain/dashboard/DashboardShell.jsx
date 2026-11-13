@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Jost, Cormorant_Garamond } from "next/font/google";
@@ -92,8 +92,36 @@ const TABS = [
 export default function DashboardShell({ user, children }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const isActive = (l) => l.href !== "/" && pathname.startsWith(l.href);
+
+  /* page change hone par menu band */
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  /* bahar tap karne par ya Esc dabane par menu band */
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onPointerDown = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -114,20 +142,47 @@ export default function DashboardShell({ user, children }) {
 
   return (
     <div className={`${styles.shell} ${jost.variable} ${serif.variable}`}>
-      {/* ---------- Mobile top bar (brand + logout, no hamburger) ---------- */}
+      {/* ---------- Mobile top bar (brand + profile menu) ---------- */}
       <header className={styles.topbar}>
         <Link href="/" className={styles.topBrand}>
           {BRAND}
         </Link>
-        <button
-          type="button"
-          className={styles.topLogout}
-          aria-label="Logout"
-          onClick={handleLogout}
-          disabled={loggingOut}
-        >
-          <LogoutIcon size={18} />
-        </button>
+
+        <div className={styles.menuWrap} ref={menuRef}>
+          <button
+            type="button"
+            className={styles.topAvatar}
+            aria-label="Account menu"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {initial}
+          </button>
+
+          {menuOpen && (
+            <div className={styles.dropdown} role="menu">
+              <div className={styles.dropUser}>
+                <div className={styles.dropAvatar}>{initial}</div>
+                <div className={styles.dropText}>
+                  <strong className={styles.dropName}>{user?.username}</strong>
+                  <span className={styles.dropEmail}>{user?.email}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.dropLogout}
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                <LogoutIcon size={18} />
+                <span>{loggingOut ? "Logging out..." : "Logout"}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* ---------- Desktop sidebar ---------- */}

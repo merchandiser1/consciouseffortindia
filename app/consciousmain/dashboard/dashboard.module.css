@@ -107,7 +107,8 @@
 .brand:focus-visible,
 .topBrand:focus-visible,
 .primaryBtn:focus-visible,
-.topLogout:focus-visible,
+.topAvatar:focus-visible,
+.dropLogout:focus-visible,
 .tab:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
@@ -511,27 +512,138 @@
     font-size: 14px;
   }
 
-  .topLogout {
+  /* ---------- profile avatar + dropdown ---------- */
+  .menuWrap {
+    position: relative;
+  }
+
+  .topAvatar {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    border: 1px solid var(--line);
+    border: 0;
     border-radius: 50%;
-    background: #fff;
-    color: var(--ink);
+    background: var(--ink);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .topAvatar:active {
+    transform: scale(0.94);
+  }
+
+  .topAvatar[aria-expanded="true"] {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px var(--ink);
+  }
+
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: min(260px, calc(100vw - 32px));
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow:
+      0 4px 12px rgba(60, 40, 20, 0.08),
+      0 18px 40px rgba(60, 40, 20, 0.14);
+    transform-origin: top right;
+    animation: dropIn 0.18s ease-out both;
+  }
+
+  .dropUser {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px 14px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    min-width: 0;
+  }
+
+  .dropAvatar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .dropText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .dropName {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dropEmail {
+    font-size: 12px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dropLogout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #a02a2a;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     transition: background 0.2s ease;
   }
 
-  .topLogout:active {
-    background: var(--cream);
+  .dropLogout:active:not(:disabled) {
+    background: #fde8e8;
   }
 
-  .topLogout:disabled {
-    opacity: 0.5;
+  .dropLogout:disabled {
+    opacity: 0.55;
     cursor: not-allowed;
+  }
+
+  @keyframes dropIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   /* ---------- content: flat, app-like ---------- */
@@ -631,7 +743,12 @@
   .logout,
   .primaryBtn,
   .tab,
-  .topLogout {
+  .topAvatar,
+  .dropLogout {
     transition: none;
+  }
+
+  .dropdown {
+    animation: none;
   }
 }
