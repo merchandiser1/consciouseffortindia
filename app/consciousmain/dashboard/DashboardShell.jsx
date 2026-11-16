@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Jost, Cormorant_Garamond } from "next/font/google";
+import { Jost, Cormorant_Garamond, Playfair_Display } from "next/font/google";
 import styles from "./dashboard.module.css";
 
 const jost = Jost({
@@ -20,7 +20,15 @@ const serif = Cormorant_Garamond({
   display: "swap",
 });
 
-const BRAND = "#CONSCIOUSEFFORT";
+// Brand logo font (same as the main navbar)
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-brand",
+  display: "swap",
+});
+
+const BRAND = "#ConsciousEffort India";
 const BASE = "/consciousmain/dashboard";
 const LOGIN_HREF = "/consciousmain/login";
 
@@ -141,7 +149,9 @@ export default function DashboardShell({ user, children }) {
   const initial = (user?.username || "U").trim().charAt(0).toUpperCase();
 
   return (
-    <div className={`${styles.shell} ${jost.variable} ${serif.variable}`}>
+    <div
+      className={`${styles.shell} ${jost.variable} ${serif.variable} ${playfair.variable}`}
+    >
       {/* ---------- Mobile top bar (brand + profile menu) ---------- */}
       <header className={styles.topbar}>
         <Link href="/" className={styles.topBrand}>

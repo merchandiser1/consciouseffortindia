@@ -26,6 +26,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 0;
 }
 
 .est {
@@ -48,13 +49,16 @@
   animation: grow 0.9s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* "#ConsciousEffort India" is longer now: slightly smaller size + balanced wrap */
 .title {
   font-family: "Times New Roman", Times, serif;
   font-weight: 400;
-  font-size: clamp(2.4rem, 5.2vw, 4.2rem);
-  line-height: 1.05;
+  font-size: clamp(2.2rem, 4.6vw, 3.8rem);
+  line-height: 1.08;
   color: #000;
   margin: 0 0 18px;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .subtitle {

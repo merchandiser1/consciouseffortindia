@@ -12,6 +12,8 @@
 .rm-root {
   --rm-font: var(--font-poppins), "Poppins", "Helvetica Neue", Arial, sans-serif;
   --rm-logo-font: var(--font-jost), "Jost", "Helvetica Neue", Arial, sans-serif;
+  /* Brand logo: elegant serif (#ConsciousEffort India) */
+  --rm-brand-font: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 /* ---------- Header: pure black ---------- */
@@ -46,14 +48,15 @@
   gap: 24px;
 }
 
-/* ---------- Logo (text) ---------- */
+/* ---------- Logo (text): #ConsciousEffort India ---------- */
 .rm-nav__logo {
   color: var(--rm-ink);
   text-decoration: none;
-  font-family: var(--rm-logo-font);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-family: var(--rm-brand-font);
+  font-size: 1.55rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
   white-space: nowrap;
 }
 
@@ -234,8 +237,9 @@ button.rm-nav__login {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   flex-shrink: 0;
-  height: var(--rm-nav-h);
+  min-height: var(--rm-nav-h);
   margin: 0 -24px 6px;
   padding: 0 24px;
   border-bottom: 1px solid #e8e8e8;
@@ -244,11 +248,13 @@ button.rm-nav__login {
 .rm-drawer__logo {
   color: #000;
   text-decoration: none;
-  font-family: var(--rm-logo-font);
-  font-size: 0.92rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
+  font-family: var(--rm-brand-font);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  /* narrow drawers: let "India" wrap to a 2nd line instead of overflowing */
+  white-space: normal;
 }
 
 /* ---------- Close button: light circle, black X ---------- */
@@ -493,17 +499,28 @@ button.rm-drawer__login:disabled {
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1100px) and (min-width: 992px) {
+  /* logo is wider now: tighten links so everything fits on small laptops */
+  .rm-nav__logo { font-size: 1.35rem; }
+  .rm-nav__link { padding: 10px 12px; }
+  .rm-nav__link::after { left: 12px; right: 12px; }
+}
+
 @media (max-width: 991px) {
   :root { --rm-nav-h: 68px; }
 
   .rm-nav__right { display: none; }
   .rm-burger { display: block; margin-right: -10px; }
-  .rm-nav__logo { font-size: 0.98rem; }
+  .rm-nav__logo { font-size: 1.3rem; }
 }
 
-@media (max-width: 380px) {
-  .rm-nav__logo { font-size: 0.88rem; letter-spacing: 0.07em; }
-  .rm-drawer__logo { font-size: 0.82rem; letter-spacing: 0.05em; }
+@media (max-width: 420px) {
+  .rm-nav__logo { font-size: 1.12rem; }
+}
+
+@media (max-width: 360px) {
+  .rm-nav__logo { font-size: 1rem; }
+  .rm-drawer__logo { font-size: 1rem; }
 }
 
 @media (min-width: 992px) {

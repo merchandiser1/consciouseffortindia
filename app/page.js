@@ -150,7 +150,7 @@ export default function Home() {
             </p>
 
             <h1 className={`${styles.title} ${styles.fade}`} style={{ "--d": "0.2s" }}>
-              #ConsciousEffort
+              #ConsciousEffort India
             </h1>
 
             <h2 className={`${styles.subtitle} ${styles.fade}`} style={{ "--d": "0.35s" }}>
@@ -158,13 +158,13 @@ export default function Home() {
             </h2>
 
             <p className={`${styles.text} ${styles.fade}`} style={{ "--d": "0.5s" }}>
-              Founded in 2017, #ConsciousEffort is India’s first and largest
-              platform on a mission to educate, engage and empower people about
-              sustainability in the fashion, beauty &amp; lifestyle industry. We
-              host conversations with the industry’s most profound change
-              makers, give sustainable brands a platform to showcase through
-              curated pop-ups and build a community that champion’s conscious
-              fashion and living.
+              Founded in 2017, #ConsciousEffort India is India’s first and
+              largest platform on a mission to educate, engage and empower
+              people about sustainability in the fashion, beauty &amp; lifestyle
+              industry. We host conversations with the industry’s most profound
+              change makers, give sustainable brands a platform to showcase
+              through curated pop-ups and build a community that champion’s
+              conscious fashion and living.
             </p>
 
             <div className={`${styles.actions} ${styles.fade}`} style={{ "--d": "0.65s" }}>
@@ -180,7 +180,7 @@ export default function Home() {
             <div className={styles.frame}>
               <Image
                 src="/headerposter.png"
-                alt="#ConsciousEffort sustainable fashion event"
+                alt="#ConsciousEffort India sustainable fashion event"
                 fill
                 priority
                 sizes="(max-width: 900px) 90vw, 45vw"

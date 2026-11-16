@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Poppins, Jost } from "next/font/google";
+import { Poppins, Jost, Playfair_Display } from "next/font/google";
 import "./nav.css";
 
 // Fonts are loaded HERE, so no change is needed in layout.js
@@ -21,8 +21,16 @@ const jost = Jost({
   display: "swap",
 });
 
+// Logo font (elegant high-contrast serif)
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
 const BRAND_TITLE = "Saahra";
-const LOGO_TEXT = "#CONSCIOUSEFFORT";
+const LOGO_TEXT = "#ConsciousEffort India";
 const LOGO_URL =
   "https://www.saahra.com/pages/conscious-effort-design-show-and-conclave";
 
@@ -345,7 +353,7 @@ export default function Nav() {
     <div
       ref={rootRef}
       data-rm-nav
-      className={`rm-root ${poppins.variable} ${jost.variable}`}
+      className={`rm-root ${poppins.variable} ${jost.variable} ${playfair.variable}`}
       style={{ display: primary ? "contents" : "none" }}
     >
       <div
@@ -353,7 +361,7 @@ export default function Nav() {
         className={`rm-nav ${scrolled ? "rm-nav--scrolled" : ""} ${open ? "rm-nav--open" : ""}`}
       >
         <div className="rm-nav__inner">
-          {/* Logo: #CONSCIOUSEFFORT */}
+          {/* Logo: #ConsciousEffort India */}
           <a href={LOGO_URL} className="rm-nav__logo">
             {LOGO_TEXT}
           </a>

@@ -55,14 +55,18 @@
   margin-bottom: 30px;
 }
 
+/* Brand logo: #ConsciousEffort India (Playfair Display, same as navbar) */
 .brand,
 .topBrand {
-  font-size: 15px;
+  font-family: var(--font-brand), Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0;
+  line-height: 1.15;
   color: var(--ink);
   text-decoration: none;
-  white-space: nowrap;
+  /* sidebar tang ho to "India" neeche aa jaye, overflow na ho */
+  white-space: normal;
 }
 
 .menuLabel {
@@ -537,7 +541,8 @@
   }
 
   .topBrand {
-    font-size: 14px;
+    font-size: 1.25rem;
+    white-space: nowrap;
   }
 
   /* ---------- profile avatar + dropdown ---------- */
@@ -764,6 +769,13 @@
 @media (max-width: 480px) {
   .pageHead .primaryBtn {
     width: 100%;
+  }
+}
+
+/* bahut chhote phones: logo + avatar ek line mein fit ho */
+@media (max-width: 360px) {
+  .topBrand {
+    font-size: 1.1rem;
   }
 }
 

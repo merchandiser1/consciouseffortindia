@@ -10,7 +10,6 @@ import styles from "./dashboard.module.css";
 // Routes yahan se change karo
 const LOGIN_PATH = "/login";
 const UPCOMING_PATH = "/upcoming-events";
-const HOME_PATH = "/";
 const PAYMENTS_PATH = "/consciousmain/dashboard/payments";
 
 const serif = Cormorant_Garamond({
@@ -56,33 +55,7 @@ const Svg = ({ size = 20, children, fill = "none", sw = 1.8 }) => (
 );
 
 const I = {
-  grid: (s) => (
-    <Svg size={s}>
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
-    </Svg>
-  ),
   rupee: (s) => (<Svg size={s}><path d="M6 4h12M6 9h12M6 4c6 0 8 2 8 5s-2 5-8 5l7 6" /></Svg>),
-  sparkle: (s) => (
-    <Svg size={s}>
-      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
-      <path d="M19 15l.7 1.8L21.5 17.5l-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7L19 15z" />
-    </Svg>
-  ),
-  sparkleSolid: (s) => (
-    <Svg size={s} fill="currentColor" sw={0}>
-      <path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2L12 2z" />
-    </Svg>
-  ),
-  home: (s) => (
-    <Svg size={s}>
-      <path d="M3 11l9-8 9 8" />
-      <path d="M5 10v10h14V10" />
-      <path d="M10 20v-6h4v6" />
-    </Svg>
-  ),
   check: (s) => (<Svg size={s} sw={2.6}><polyline points="5 12 10 17 19 7" /></Svg>),
   checkCircle: (s) => (
     <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true">
@@ -109,39 +82,10 @@ const I = {
       <path d="M8 14h.01M12 14h.01M16 14h.01" strokeWidth="2.6" />
     </Svg>
   ),
-  card: (s) => (
-    <Svg size={s}>
-      <rect x="3" y="5" width="18" height="14" rx="2.5" />
-      <path d="M3 10h18M7 15h4" />
-    </Svg>
-  ),
   lock: (s) => (
     <Svg size={s}>
       <rect x="5" y="11" width="14" height="10" rx="2.5" />
       <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-    </Svg>
-  ),
-  clip: (s) => (
-    <Svg size={s}>
-      <path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.2-8.2" />
-    </Svg>
-  ),
-  send: (s) => (
-    <Svg size={s} sw={2}>
-      <path d="M21 3L10 14" />
-      <path d="M21 3l-7 18-4-7-7-4 18-7z" />
-    </Svg>
-  ),
-  chat: (s) => (
-    <Svg size={s} sw={2}>
-      <path d="M21 11.5a8.4 8.4 0 0 1-12.2 7.5L3 20.5l1.6-5.2A8.4 8.4 0 1 1 21 11.5z" />
-    </Svg>
-  ),
-  min: (s) => (<Svg size={s} sw={2.4}><line x1="5" y1="12" x2="19" y2="12" /></Svg>),
-  close: (s) => (
-    <Svg size={s} sw={2.4}>
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
     </Svg>
   ),
   arrow: (s) => (
@@ -604,174 +548,6 @@ function AppCard({ app, booths, taken, patch, reload, notify }) {
   );
 }
 
-/* ================= CHATBOT ================= */
-const QUICK = [
-  { key: "applications", title: "My Applications", sub: "Track your event applications", icon: I.grid },
-  { key: "booth", title: "Choose Booth", sub: "Pick a booth & pay", icon: I.card },
-  { key: "showcases", title: "Browse Showcases", sub: "Explore upcoming events", icon: I.sparkle },
-  { key: "home", title: "Back to SAAHRA", sub: "Go to homepage", icon: I.home },
-];
-
-function Chatbot({ apps, onGoPage }) {
-  const [state, setState] = useState("closed"); // open | min | closed
-  const [text, setText] = useState("");
-  const [msgs, setMsgs] = useState([]);
-  const [typing, setTyping] = useState(false);
-  const [unread, setUnread] = useState(true);
-  const bodyRef = useRef(null);
-
-  useEffect(() => {
-    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
-  }, [msgs, typing, state]);
-
-  useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && setState((s) => (s === "open" ? "closed" : s));
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  const reply = (q) => {
-    const s = q.toLowerCase();
-    const paid = apps.filter((a) => a.payment?.status === "paid").length;
-    if (/pay|txn|transaction|₹|rupee/.test(s))
-      return apps.length
-        ? `You have ${paid} paid booking${paid === 1 ? "" : "s"}. Payment opens on your application card right after you select a booth.`
-        : "No payments yet. Payment opens once your application is approved and a booth is selected.";
-    if (/applic|status|approve|review/.test(s))
-      return apps.length
-        ? `You have ${apps.length} application${apps.length === 1 ? "" : "s"}. Scroll down to see each step.`
-        : "You have no applications yet. Browse showcases and apply to get started.";
-    if (/location|venue|booth|stall/.test(s))
-      return "After approval, pick a booth (Woodpecker, Hummingbird, Eagle...) and tap Continue to Payment. Payment opens right after.";
-    if (/show|event|browse/.test(s)) return "Opening upcoming showcases for you.";
-    if (/hi|hello|hey/.test(s)) return "Hello! Ask about your applications, booths or showcases.";
-    return "I can help with applications, booths and showcases. Try one of the quick options.";
-  };
-
-  const send = (raw) => {
-    const q = (raw ?? text).trim();
-    if (!q) return;
-    setMsgs((m) => [...m, { from: "me", text: q }]);
-    setText("");
-    setTyping(true);
-    setTimeout(() => {
-      setMsgs((m) => [...m, { from: "bot", text: reply(q) }]);
-      setTyping(false);
-      if (/show|event|browse/.test(q.toLowerCase())) onGoPage(UPCOMING_PATH);
-    }, 650);
-  };
-
-  const quick = (k) => {
-    if (k === "applications" || k === "booth") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      if (window.innerWidth <= 900) setState("min");
-      setMsgs((m) => [
-        ...m,
-        { from: "me", text: k === "applications" ? "My Applications" : "Choose Booth" },
-        {
-          from: "bot",
-          text:
-            k === "applications"
-              ? "Your applications are right here."
-              : "Pick a booth on your approved application, then tap Continue to Payment.",
-        },
-      ]);
-    } else if (k === "showcases") onGoPage(UPCOMING_PATH);
-    else onGoPage(HOME_PATH);
-  };
-
-  const toggleLauncher = () => {
-    setUnread(false);
-    setState((s) => (s === "open" ? "closed" : "open"));
-  };
-
-  return (
-    <>
-      {state !== "closed" && (
-        <section className={`${styles.chat} ${state === "min" ? styles.chatMin : ""}`}
-          role="dialog" aria-label="SAAHRA Assistant">
-          <header className={styles.chatHead}>
-            <span className={styles.botAvatar}>{I.sparkleSolid(22)}</span>
-            <div className={styles.chatWho}>
-              <strong>SAAHRA Assistant</strong>
-              <p><i className={styles.onlineDot} /><b>Online</b> · Here to help you</p>
-            </div>
-            <button className={styles.chatIcBtn}
-              aria-label={state === "min" ? "Expand chat" : "Minimize chat"}
-              onClick={() => setState((s) => (s === "min" ? "open" : "min"))}>
-              {I.min(22)}
-            </button>
-            <button className={styles.chatIcBtn} aria-label="Close chat" onClick={() => setState("closed")}>
-              {I.close(22)}
-            </button>
-          </header>
-
-          {state === "open" && (
-            <>
-              <div className={styles.chatBody} ref={bodyRef}>
-                <div className={styles.msgRow}>
-                  <span className={`${styles.botAvatar} ${styles.botSm}`}>{I.sparkleSolid(18)}</span>
-                  <div className={styles.bubble}>
-                    Hi there! 👋<br />I’m your SAAHRA Assistant.<br />How can I help you today?
-                  </div>
-                </div>
-
-                {msgs.length === 0 && (
-                  <div className={styles.quickGrid}>
-                    {QUICK.map((q) => (
-                      <button key={q.key} className={styles.quickCard} onClick={() => quick(q.key)}>
-                        <span className={styles.quickIc}>{q.icon(26)}</span>
-                        <strong>{q.title}</strong>
-                        <span>{q.sub}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {msgs.map((m, i) =>
-                  m.from === "bot" ? (
-                    <div key={i} className={styles.msgRow}>
-                      <span className={`${styles.botAvatar} ${styles.botSm}`}>{I.sparkleSolid(18)}</span>
-                      <div className={styles.bubble}>{m.text}</div>
-                    </div>
-                  ) : (
-                    <div key={i} className={`${styles.msgRow} ${styles.msgMe}`}>
-                      <div className={`${styles.bubble} ${styles.bubbleMe}`}>{m.text}</div>
-                    </div>
-                  )
-                )}
-
-                {typing && (
-                  <div className={styles.msgRow}>
-                    <span className={`${styles.botAvatar} ${styles.botSm}`}>{I.sparkleSolid(18)}</span>
-                    <div className={`${styles.bubble} ${styles.typing}`}><i /> <i /> <i /></div>
-                  </div>
-                )}
-              </div>
-
-              <form className={styles.chatInput} onSubmit={(e) => { e.preventDefault(); send(); }}>
-                <button type="button" className={styles.attach} aria-label="Attach file">{I.clip(22)}</button>
-                <input value={text} onChange={(e) => setText(e.target.value)}
-                  placeholder="Type your message..." aria-label="Type your message" />
-                <button type="submit" className={styles.sendBtn} aria-label="Send message">{I.send(20)}</button>
-              </form>
-            </>
-          )}
-        </section>
-      )}
-
-      <button
-        className={`${styles.launcher} ${state === "open" ? styles.launcherOpen : ""}`}
-        onClick={toggleLauncher}
-        aria-label={state === "open" ? "Close assistant" : "Open assistant"}
-      >
-        {I.chat(34)}
-        {unread && <i className={styles.launchDot} />}
-      </button>
-    </>
-  );
-}
-
 /* ================= PAGE ================= */
 export default function Dashboard() {
   const router = useRouter();
@@ -859,8 +635,6 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-
-      {data && <Chatbot apps={apps} onGoPage={(href) => router.push(href)} />}
 
       {toast && <div className={styles.toast} role="status">{toast}</div>}
     </div>
