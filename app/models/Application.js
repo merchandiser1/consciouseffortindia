@@ -2,6 +2,19 @@ import mongoose from "mongoose";
 
 // Reuse this in the admin API / dashboard so the values never get out of sync
 export const APPLICATION_STATUSES = ["pending", "approved", "rejected"];
+export const PAYMENT_STATUSES = ["pending", "paid"];
+export const PAYMENT_METHODS = ["upi", "card", "netbanking"];
+
+const PaymentSchema = new mongoose.Schema(
+  {
+    status: { type: String, enum: PAYMENT_STATUSES, default: "pending" },
+    method: { type: String, enum: PAYMENT_METHODS },
+    amount: { type: Number, default: 0 }, // total incl. GST (server calculated)
+    txnId: { type: String },
+    paidAt: { type: Date },
+  },
+  { _id: false }
+);
 
 const ApplicationSchema = new mongoose.Schema(
   {
@@ -35,12 +48,22 @@ const ApplicationSchema = new mongoose.Schema(
       index: true,
     },
 
+    // ---- Booth + payment (set after approval) ----
+    location: { type: String, trim: true }, // booth name, e.g. "Woodpecker"
+    payment: { type: PaymentSchema },
+
     ip: { type: String, default: "" },
   },
   { timestamps: true }
 );
 
 ApplicationSchema.index({ email: 1, eventTitle: 1 });
+ApplicationSchema.index({ eventTitle: 1, location: 1 }); // booth stock counting
+
+// Dev me hot-reload purana schema cache rakhta hai, isliye usse hata do
+if (process.env.NODE_ENV !== "production" && mongoose.models.Application) {
+  delete mongoose.models.Application;
+}
 
 export default mongoose.models.Application ||
   mongoose.model("Application", ApplicationSchema);

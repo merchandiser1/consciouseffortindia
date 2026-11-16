@@ -31,8 +31,11 @@
    SIDEBAR (desktop)
    ========================================================= */
 .sidebar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  z-index: 30;
+  width: 290px;
   height: 100vh;
   height: 100dvh;
   display: flex;
@@ -41,6 +44,7 @@
   background: #fff;
   border-right: 1px solid var(--line);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .sideHead {
@@ -199,22 +203,46 @@
   cursor: not-allowed;
 }
 
+/* sidebar: chhoti height wali screens ke liye compact */
+@media (min-width: 901px) and (max-height: 760px) {
+  .sidebar { padding: 18px 14px 12px; }
+  .sideHead { margin-bottom: 18px; }
+  .menuLabel { margin-bottom: 8px; }
+  .nav { gap: 4px; }
+  .link { padding: 10px 14px; font-size: 15px; }
+  .bottom { padding-top: 14px; gap: 8px; }
+  .userCard { padding: 9px 12px; }
+  .avatar { width: 36px; height: 36px; font-size: 14px; }
+  .logout { padding: 11px 16px; font-size: 15px; }
+}
+
+/* bahut chhoti height (jaise 550px) */
+@media (min-width: 901px) and (max-height: 600px) {
+  .sidebar { padding: 14px 12px 10px; }
+  .sideHead { margin-bottom: 12px; }
+  .menuLabel { display: none; }
+  .link { padding: 8px 12px; }
+  .bottom { padding-top: 10px; }
+  .userCard { display: none; }
+}
+
 /* =========================================================
-   MAIN
+   MAIN  (outer card removed — pages sit directly on the page bg)
    ========================================================= */
 .main {
+  grid-column: 2;
   min-width: 0;
-  padding: 28px clamp(16px, 3vw, 40px) 48px;
+  padding: 40px clamp(20px, 4vw, 56px) 56px;
 }
 
 .card {
   max-width: 1100px;
   margin: 0 auto;
-  padding: clamp(22px, 3vw, 40px);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  box-shadow: 0 4px 24px rgba(60, 40, 20, 0.04);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* mobile-only bits are hidden on desktop */
@@ -648,6 +676,7 @@
 
   /* ---------- content: flat, app-like ---------- */
   .main {
+    grid-column: 1;
     padding: calc(60px + env(safe-area-inset-top, 0px) + 20px) 16px
       calc(84px + env(safe-area-inset-bottom, 0px));
   }
