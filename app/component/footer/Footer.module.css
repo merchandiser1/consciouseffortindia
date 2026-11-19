@@ -1,0 +1,213 @@
+.footer {
+  --gold: #b8935a;
+  --gold-light: #d9bf8f;
+
+  width: 100%;
+  background: #0e0e0e;
+  color: #cfcfcf;
+  border-top: 3px solid var(--gold);
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 70px 24px 50px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 56px;
+}
+
+/* ---------- brand ---------- */
+.logo {
+  margin: 0 0 16px;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.2;
+  color: #fff;
+}
+
+.tagline {
+  max-width: 420px;
+  margin: 0 0 22px;
+  font-size: 0.98rem;
+  line-height: 1.8;
+  color: #a8a8a8;
+}
+
+.est {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.est span {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* ---------- columns ---------- */
+.col {
+  min-width: 0;
+}
+
+.heading {
+  margin: 0 0 22px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.link {
+  display: inline-block;
+  font-size: 1rem;
+  color: #cfcfcf;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.link:hover {
+  color: var(--gold-light);
+  transform: translateX(6px);
+}
+
+.connectText {
+  margin: 0 0 22px;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: #a8a8a8;
+}
+
+/* ---------- social icons ---------- */
+.social {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: var(--gold-light);
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  text-decoration: none;
+  transition: transform 0.35s ease, color 0.35s ease,
+    background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.iconBtn:hover {
+  transform: translateY(-4px);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+}
+
+.insta:hover {
+  background: linear-gradient(45deg, #f09433, #dc2743 55%, #bc1888);
+}
+
+.wa:hover {
+  background: #25d366;
+}
+
+.iconBtn:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+/* ---------- bottom bar ---------- */
+.bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 24px;
+  text-align: center;
+}
+
+.bottom p {
+  margin: 0;
+  font-size: 0.88rem;
+  letter-spacing: 0.5px;
+  color: #8a8a8a;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 992px) {
+  .container {
+    grid-template-columns: 1fr 1fr;
+    gap: 44px 40px;
+    padding: 60px 24px 44px;
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 48px 20px 36px;
+    text-align: center;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tagline {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .list {
+    align-items: center;
+  }
+
+  .link:hover {
+    transform: none;
+  }
+
+  .social {
+    justify-content: center;
+  }
+
+  /* floating WhatsApp button ke liye jagah */
+  .bottom {
+    padding: 18px 20px 84px;
+  }
+}
+
+@media (hover: none) {
+  .iconBtn:hover {
+    transform: none;
+  }
+}

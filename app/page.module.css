@@ -216,11 +216,12 @@
 
 /* =========================================================
    SHARED: gold theme + eyebrow heading
-   (Upcoming / Previous / Sponsors teeno me same)
+   (Upcoming / Previous / Sponsors / Enquiry)
    ========================================================= */
 .upcoming,
 .past,
-.sponsors {
+.sponsors,
+.enquiry {
   --cream: #fbf7f0;
   --cream-2: #f6efe2;
   --gold: #b8935a;
@@ -232,7 +233,8 @@
 /* nav ke neeche heading na chhupe (nav link se scroll karne par) */
 .upcoming,
 .past,
-.sponsors {
+.sponsors,
+.enquiry {
   scroll-margin-top: 30px;
 }
 
@@ -665,7 +667,7 @@
    ========================================================= */
 .sponsors {
   width: 100%;
-  padding: 100px 0 110px;
+  padding: 70px 0 40px; /* bottom gap almost zero */
   background: linear-gradient(#faf9f7, #fff 80%);
   border-top: 1px solid #eee;
   overflow: hidden;
@@ -679,7 +681,7 @@
 
 .sponsorsHead {
   text-align: center;
-  margin-bottom: 44px;
+  margin-bottom: 30px;
 }
 
 .sponsorsHead .eyebrow {
@@ -738,14 +740,14 @@
   align-items: center;
 }
 
-/* BIGGER LOGOS (desktop) */
+/* LOGOS (desktop) */
 .logoItem {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   width: clamp(180px, 22vw, 300px);
-  height: clamp(100px, 12vw, 160px);
+  height: clamp(80px, 9vw, 110px);
   margin: 0 clamp(20px, 3.5vw, 56px);
 }
 
@@ -764,6 +766,54 @@
   to {
     transform: translateX(0);
   }
+}
+
+/* =========================================================
+   ENQUIRY
+   ========================================================= */
+.enquiry {
+  width: 100%;
+  padding: 50px 24px 80px; /* top gap kam, border-top hata diya */
+  background: #fff;
+  overflow: hidden;
+}
+
+.enquiry .sectionHead {
+  margin-bottom: 28px;
+}
+
+.enquiryContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   WHATSAPP FLOATING ICON (right side, fixed)
+   ========================================================= */
+.whatsapp {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1500;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.whatsapp:hover {
+  transform: scale(1.1);
+}
+
+.whatsapp img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 /* ---------- Scroll reveal (Chrome / Edge) ---------- */
@@ -805,7 +855,8 @@
   .eventCard,
   .metaItem,
   .pastCard,
-  .pastImg {
+  .pastImg,
+  .whatsapp {
     transition: none;
   }
 }
@@ -926,7 +977,7 @@
   }
 
   .sponsors {
-    padding: 70px 0 80px;
+    padding: 56px 0 28px;
   }
 
   .sponsorsContainer {
@@ -934,17 +985,25 @@
   }
 
   .sponsorsHead {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   /* tablet logo size */
   .logoItem {
     width: clamp(150px, 26vw, 220px);
-    height: clamp(84px, 13vw, 120px);
+    height: clamp(64px, 10vw, 90px);
   }
 
   .marqueeTrack {
     animation-duration: 32s;
+  }
+
+  .enquiry {
+    padding:  40px 20px 64px; 
+  }
+
+  .enquiry .sectionHead {
+    margin-bottom: 22px;
   }
 }
 
@@ -1063,21 +1122,37 @@
 
   /* sponsors */
   .sponsors {
-    padding: 60px 0 66px;
+    padding: 44px 0 22px;
   }
 
   .sponsorsContainer {
     padding: 0 16px;
   }
 
-  /* BIGGER LOGOS (phone) */
+  /* logos (phone) */
   .logoItem {
-    width: 170px;
-    height: 90px;
-    margin: 0 18px;
+    width: 140px;
+    height: 70px;
+    margin: 0 16px;
   }
 
   .marqueeTrack {
     animation-duration: 28s;
+  }
+
+  /* enquiry + whatsapp */
+  .enquiry {
+    padding: 32px 16px 52px;
+  }
+
+  .enquiry .sectionHead {
+    margin-bottom: 18px;
+  }
+
+  .whatsapp {
+    width: 52px;
+    height: 52px;
+    right: 16px;
+    bottom: 16px;
   }
 }

@@ -5,15 +5,25 @@ import Application from "@/app/models/Application";
 import admin from "../admin.module.css";
 import styles from "./overview.module.css";
 
-const inr = (n) => `₹${Number(n).toLocaleString("en-IN")}`;
+const inr = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 const fmtDate = (d) =>
-  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  d
+    ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+    : "—";
 
 const STATUS = {
   pending: { label: "Under review", cls: admin.badgePending },
+  shortlisted: { label: "Shortlisted", cls: admin.badgePending },
   approved: { label: "Approved", cls: admin.badgeApproved },
   rejected: { label: "Rejected", cls: admin.badgeRejected },
 };
+
+const PAY = {
+  paid: { label: "Paid", cls: admin.badgeApproved },
+  pending: { label: "Payment pending", cls: admin.badgePending },
+};
+
+const catOpen = (url) => `/api/admin/catalogue?url=${encodeURIComponent(url)}`;
 
 const ICONS = {
   file: <><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20V3.5z" /><path d="M14 3.5V8h4M10 12h5M10 16h5" /></>,
@@ -28,20 +38,22 @@ export default async function OverviewPage() {
   await requireAdmin();
   await connectDB();
 
-  const [total, pending, approved, rejected, payPending, paid, docs] = await Promise.all([
-    Application.countDocuments({}),
-    Application.countDocuments({ status: "pending" }),
-    Application.countDocuments({ status: "approved" }),
-    Application.countDocuments({ status: "rejected" }),
-    Application.countDocuments({ paymentStatus: "pending" }),
-    Application.aggregate([
-      { $match: { paymentStatus: "paid" } },
-      { $group: { _id: null, sum: { $sum: "$amount" } } },
-    ]),
-    Application.find({}).sort({ createdAt: -1 }).limit(6).lean(),
-  ]);
+  const [total, pending, approved, rejected, payPending, payDone, paidAgg, docs] =
+    await Promise.all([
+      Application.countDocuments({}),
+      Application.countDocuments({ status: { $in: ["pending", "shortlisted"] } }),
+      Application.countDocuments({ status: "approved" }),
+      Application.countDocuments({ status: "rejected" }),
+      Application.countDocuments({ "payment.status": "pending" }),
+      Application.countDocuments({ "payment.status": "paid" }),
+      Application.aggregate([
+        { $match: { "payment.status": "paid" } },
+        { $group: { _id: null, sum: { $sum: "$payment.amount" } } },
+      ]),
+      Application.find({}).sort({ createdAt: -1 }).limit(6).lean(),
+    ]);
 
-  const revenue = paid[0]?.sum || 0;
+  const revenue = paidAgg[0]?.sum || 0;
 
   const cards = [
     { label: "Total Applications", value: total, icon: "file", tone: "tTotal" },
@@ -49,6 +61,7 @@ export default async function OverviewPage() {
     { label: "Approved", value: approved, icon: "check", tone: "tOk" },
     { label: "Rejected", value: rejected, icon: "cross", tone: "tBad" },
     { label: "Payments Pending", value: payPending, icon: "wallet", tone: "tPay" },
+    { label: "Payments Done", value: payDone, icon: "check", tone: "tOk" },
     { label: "Revenue (Paid)", value: inr(revenue), icon: "rupee", tone: "tOk" },
   ];
 
@@ -62,9 +75,19 @@ export default async function OverviewPage() {
     phone: a.phone || "",
     website: a.website || "",
     message: a.message || "",
+    location: a.location || "",
     createdAt: a.createdAt ? new Date(a.createdAt).toISOString() : null,
     catalogueUrl: a.catalogueUrl || "",
     imageUrls: a.imageUrls || [],
+    payment: a.payment
+      ? {
+          status: a.payment.status || "",
+          amount: a.payment.amount || 0,
+          method: a.payment.method || "",
+          txnId: a.payment.txnId || "",
+          paidAt: a.payment.paidAt ? new Date(a.payment.paidAt).toISOString() : null,
+        }
+      : null,
   }));
 
   return (
@@ -97,6 +120,7 @@ export default async function OverviewPage() {
         <ul className={`${admin.list} ${styles.recent}`}>
           {recent.map((a) => {
             const st = STATUS[a.status] || STATUS.pending;
+            const pay = a.payment?.status ? PAY[a.payment.status] : null;
             return (
               <li key={a.id} className={admin.card}>
                 <div className={admin.cardTop}>
@@ -104,7 +128,10 @@ export default async function OverviewPage() {
                     <h3 className={admin.cardBrand}>{a.brand}</h3>
                     <p className={admin.cardEvent}>{a.eventTitle}</p>
                   </div>
-                  <span className={`${admin.badge} ${st.cls}`}>{st.label}</span>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <span className={`${admin.badge} ${st.cls}`}>{st.label}</span>
+                    {pay && <span className={`${admin.badge} ${pay.cls}`}>{pay.label}</span>}
+                  </div>
                 </div>
 
                 <div className={admin.actions}>
@@ -117,6 +144,20 @@ export default async function OverviewPage() {
                         {a.email && (<><dt>Email</dt><dd>{a.email}</dd></>)}
                         {a.phone && (<><dt>Phone</dt><dd>{a.phone}</dd></>)}
                         {a.website && (<><dt>Website</dt><dd>{a.website}</dd></>)}
+                        {a.location && (<><dt>Booth</dt><dd>{a.location}</dd></>)}
+                        {a.payment?.status === "paid" && (
+                          <>
+                            <dt>Paid</dt>
+                            <dd>
+                              {inr(a.payment.amount)}
+                              {a.payment.method ? ` · ${a.payment.method.toUpperCase()}` : ""}
+                            </dd>
+                            <dt>Txn ID</dt>
+                            <dd>{a.payment.txnId || "—"}</dd>
+                            <dt>Paid on</dt>
+                            <dd>{fmtDate(a.payment.paidAt)}</dd>
+                          </>
+                        )}
                       </dl>
                       {a.message && <p className={admin.msg}>{a.message}</p>}
                       {a.imageUrls.length > 0 && (
@@ -130,7 +171,7 @@ export default async function OverviewPage() {
                         </div>
                       )}
                       {a.catalogueUrl && (
-                        <a href={a.catalogueUrl} target="_blank" rel="noopener noreferrer" className={admin.textLink}>
+                        <a href={catOpen(a.catalogueUrl)} target="_blank" rel="noopener noreferrer" className={admin.textLink}>
                           View catalogue (PDF)
                         </a>
                       )}
@@ -144,7 +185,7 @@ export default async function OverviewPage() {
                       <button type="submit" className={admin.btnDark}>Approve</button>
                     </form>
                   )}
-                  {a.status !== "rejected" && (
+                  {a.status !== "rejected" && a.payment?.status !== "paid" && (
                     <form action={setStatus}>
                       <input type="hidden" name="id" value={a.id} />
                       <input type="hidden" name="status" value="rejected" />

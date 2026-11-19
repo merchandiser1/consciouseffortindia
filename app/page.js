@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Cabin, Poppins } from "next/font/google";
 import Nav from "./component/nav/Nav";
+import EnquiryForm from "./component/enquiry/EnquiryForm";
+import Reels from "./component/reels/Reels";
+import Footer from "./component/footer/Footer";
 import styles from "./page.module.css";
 
 const cabin = Cabin({
@@ -371,6 +374,39 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ================= INSTAGRAM REELS ================= */}
+      <Reels />
+
+      {/* ================= ENQUIRY ================= */}
+      <section id="enquiry" className={`${styles.enquiry} ${cabin.className}`}>
+        <div className={styles.enquiryContainer}>
+          <div className={`${styles.sectionHead} ${styles.reveal}`}>
+            <p className={`${styles.eyebrow} ${poppins.className}`}>
+              <span />
+              Enquiry
+              <span />
+            </p>
+          </div>
+
+          <EnquiryForm />
+        </div>
+      </section>
+
+      {/* ================= FOOTER ================= */}
+      <Footer />
+
+      {/* ================= WHATSAPP FLOATING ICON ================= */}
+      <a
+        href="https://wa.me/918920792438"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.whatsapp}
+        aria-label="Chat on WhatsApp"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/whatsapp.png" alt="WhatsApp" />
+      </a>
     </>
   );
 }

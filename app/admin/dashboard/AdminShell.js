@@ -30,6 +30,12 @@ const AppsIcon = (p) => (
 const RupeeIcon = (p) => (
   <Svg {...p}><path d="M7 4h11M7 9h11M7 4c6 0 8 2 8 5s-2 5-8 5l7 6" /></Svg>
 );
+const EnquiryIcon = (p) => (
+  <Svg {...p}>
+    <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5v-9z" />
+    <path d="M8 8.5h8M8 12h5" />
+  </Svg>
+);
 const HomeIcon = (p) => (
   <Svg {...p}><path d="M3 11l9-8 9 8" /><path d="M5 10v10h5v-6h4v6h5V10" /></Svg>
 );
@@ -45,6 +51,7 @@ export default function AdminShell({ payBadge = 0, children }) {
     { label: "Overview", href: `${BASE}/overview`, Icon: OverviewIcon },
     { label: "Applications", href: `${BASE}/applications`, Icon: AppsIcon },
     { label: "Payments", href: `${BASE}/payments`, Icon: RupeeIcon, badge: payBadge },
+    { label: "Enquiries", href: `${BASE}/enquiries`, Icon: EnquiryIcon },
     { label: "View Website", href: "/", Icon: HomeIcon, external: true },
   ];
 
