@@ -216,11 +216,12 @@
 
 /* =========================================================
    SHARED: gold theme + eyebrow heading
-   (Upcoming / Previous / Sponsors / Enquiry)
+   (Upcoming / Previous / Sponsors / As Seen In / Enquiry)
    ========================================================= */
 .upcoming,
 .past,
 .sponsors,
+.seen,
 .enquiry {
   --cream: #fbf7f0;
   --cream-2: #f6efe2;
@@ -234,6 +235,7 @@
 .upcoming,
 .past,
 .sponsors,
+.seen,
 .enquiry {
   scroll-margin-top: 30px;
 }
@@ -701,7 +703,7 @@
   font-style: italic;
 }
 
-/* ---------- marquee ---------- */
+/* ---------- marquee (shared by Sponsors + As Seen In) ---------- */
 .marquee {
   position: relative;
   width: 100%;
@@ -766,6 +768,56 @@
   to {
     transform: translateX(0);
   }
+}
+
+/* =========================================================
+   AS SEEN IN  (press logos, left -> right marquee)
+   ========================================================= */
+.seen {
+  width: 100%;
+  padding: 60px 0 50px;
+  background: #fff;
+  border-top: 1px solid #eee;
+  overflow: hidden;
+}
+
+.seenHead {
+  text-align: center;
+  margin-bottom: 26px;
+  padding: 0 24px;
+}
+
+.seenTitle {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.12;
+  color: #000;
+  margin: 14px 0 0;
+}
+
+.seenTitle em {
+  font-style: italic;
+}
+
+.seenItem {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(170px, 20vw, 260px);
+  height: clamp(70px, 8vw, 100px);
+  margin: 0 clamp(20px, 3vw, 48px);
+}
+
+.seenItem img {
+  max-width: 85%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* =========================================================
@@ -998,8 +1050,18 @@
     animation-duration: 32s;
   }
 
+  /* as seen in */
+  .seen {
+    padding: 48px 0 40px;
+  }
+
+  .seenItem {
+    width: clamp(140px, 26vw, 200px);
+    height: 70px;
+  }
+
   .enquiry {
-    padding:  40px 20px 64px; 
+    padding: 40px 20px 64px;
   }
 
   .enquiry .sectionHead {
@@ -1138,6 +1200,17 @@
 
   .marqueeTrack {
     animation-duration: 28s;
+  }
+
+  /* as seen in (phone) */
+  .seen {
+    padding: 40px 0 32px;
+  }
+
+  .seenItem {
+    width: 130px;
+    height: 60px;
+    margin: 0 14px;
   }
 
   /* enquiry + whatsapp */

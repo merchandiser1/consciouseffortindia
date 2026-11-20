@@ -78,13 +78,23 @@ const pastEvents = [
   },
 ];
 
-/* ---------- Sponsors (logos in /public/sponsors) ---------- */
+/* ---------- Sponsors (logos in /public) ---------- */
 const sponsors = [
   { name: "The Quorum", src: "/quorum.png" },
   { name: "GoDaddy", src: "/godaddy.png" },
   { name: "Red FM 93.5", src: "/redfm.png" },
   { name: "L'Opéra", src: "/lopera.png" },
   { name: "The Imperial, New Delhi", src: "/imperial.png" },
+];
+
+/* ---------- As Seen In (logos in /public/seen) ---------- */
+const seenIn = [
+  { name: "Vogue India", src: "/seen/vogue.png" },
+  { name: "Harper's Bazaar", src: "/seen/bazaar.png" },
+  { name: "Platform", src: "/seen/platform.png" },
+  { name: "The Telegraph", src: "/seen/telegraph.png" },
+  { name: "The Times of India", src: "/seen/timesofindia.png" },
+  { name: "NDTV", src: "/seen/ndtv.png" },
 ];
 
 const CalendarIcon = () => (
@@ -124,6 +134,25 @@ const SponsorGroup = ({ hidden = false }) => (
     {[0, 1].map((r) =>
       sponsors.map((s) => (
         <div className={styles.logoItem} key={`${r}-${s.name}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={s.src}
+            alt={hidden || r === 1 ? "" : s.name}
+            loading="lazy"
+            draggable="false"
+          />
+        </div>
+      ))
+    )}
+  </div>
+);
+
+/* Same idea for "As Seen In" */
+const SeenGroup = ({ hidden = false }) => (
+  <div className={styles.marqueeGroup} aria-hidden={hidden || undefined}>
+    {[0, 1].map((r) =>
+      seenIn.map((s) => (
+        <div className={styles.seenItem} key={`${r}-${s.name}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={s.src}
@@ -375,8 +404,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= INSTAGRAM REELS ================= */}
+      {/* ================= INSTAGRAM REELS (Follow #ConsciousEffort) ================= */}
       <Reels />
+
+      {/* ================= AS SEEN IN ================= */}
+      <section id="seen" className={`${styles.seen} ${cabin.className}`}>
+        <div className={`${styles.seenHead} ${styles.reveal}`}>
+          <p className={`${styles.eyebrow} ${poppins.className}`}>
+            <span />
+            As Seen In
+            <span />
+          </p>
+
+          <h2 className={styles.seenTitle}>
+            Featured <em>In the Press</em>
+          </h2>
+        </div>
+
+        <div className={styles.marquee} aria-label="As seen in">
+          <div className={styles.marqueeTrack}>
+            <SeenGroup />
+            <SeenGroup hidden />
+          </div>
+        </div>
+      </section>
 
       {/* ================= ENQUIRY ================= */}
       <section id="enquiry" className={`${styles.enquiry} ${cabin.className}`}>
