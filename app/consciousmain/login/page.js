@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const BRAND_TEXT = "#CONSCIOUSEFFORT";
+const BRAND_TEXT = "#CONSCIOUSEFFORT.IN";
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const usernameRe = /^[a-zA-Z0-9_.]{3,20}$/;
@@ -371,7 +371,7 @@ export default function Login() {
   };
 
   const heading = {
-    login: "Sign in to Conscious Effort",
+    login: "Sign in to ConsciousEffort India",
     signup: "Create your account",
     "forgot-email": "Forgot Password?",
     "verify-otp": "Verify Your Email",

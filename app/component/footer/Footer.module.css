@@ -98,6 +98,36 @@
   color: #a8a8a8;
 }
 
+/* ---------- stay in touch ---------- */
+.touch {
+  margin-top: 40px;
+}
+
+.touch .connectText {
+  margin-bottom: 0;
+}
+
+.contactLink {
+  color: var(--gold-light);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(217, 191, 143, 0.45);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.contactLink:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.contactLink:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
 /* ---------- social icons ---------- */
 .social {
   display: flex;
@@ -169,27 +199,27 @@
   }
 }
 
+/* MOBILE: everything left-aligned */
 @media (max-width: 600px) {
   .container {
     grid-template-columns: 1fr;
     gap: 36px;
     padding: 48px 20px 36px;
-    text-align: center;
+    text-align: left;
   }
 
   .brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: block;
   }
 
   .tagline {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
   }
 
   .list {
-    align-items: center;
+    align-items: flex-start;
   }
 
   .link:hover {
@@ -197,7 +227,11 @@
   }
 
   .social {
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  .touch {
+    margin-top: 32px;
   }
 
   /* floating WhatsApp button ke liye jagah */

@@ -45,7 +45,7 @@ const LINKS = [
   { label: "Home", href: "/", top: true },
   { label: "Upcoming Events", href: "/#upcoming", hash: "upcoming" },
   { label: "Previous Events", href: "/#previous", hash: "previous" },
-  { label: "About", href: "/about" },
+  { label: "About", href: "consciousmain/about" },
   { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
 ];
 

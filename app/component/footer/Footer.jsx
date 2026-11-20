@@ -8,6 +8,10 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["500", "600"] });
 const INSTAGRAM = "https://www.instagram.com/consciouseffortofficial";
 const WHATSAPP = "https://wa.me/918920792438";
 
+const EMAIL = "info@saahra.com";
+const PHONE_DISPLAY = "(+91) 9871110063";
+const PHONE_LINK = "tel:+919871110063";
+
 const InstaIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -47,7 +51,7 @@ const links = [
   { label: "Home", href: "/" },
   { label: "Upcoming Events", href: "/#upcoming" },
   { label: "Previous Events", href: "/#previous" },
-  { label: "About", href: "/about" },
+  { label: "About", href: "/consciousmain/about" },
   { label: "Apply for the Event", href: "/consciousmain/upcoming" },
 ];
 
@@ -83,7 +87,7 @@ export default function Footer() {
           </ul>
         </nav>
 
-        {/* Social */}
+        {/* Social + contact */}
         <div className={styles.col}>
           <h4 className={`${styles.heading} ${poppins.className}`}>Connect With Us</h4>
           <p className={styles.connectText}>
@@ -110,6 +114,21 @@ export default function Footer() {
             >
               <WhatsAppIcon />
             </a>
+          </div>
+
+          {/* Stay in Touch */}
+          <div className={styles.touch}>
+            <h4 className={`${styles.heading} ${poppins.className}`}>Stay in Touch</h4>
+            <p className={styles.connectText}>
+              Email us at{" "}
+              <a href={`mailto:${EMAIL}`} className={styles.contactLink}>
+                {EMAIL}
+              </a>{" "}
+              or please reach out to{" "}
+              <a href={PHONE_LINK} className={`${styles.contactLink} ${styles.nowrap}`}>
+                {PHONE_DISPLAY}
+              </a>
+            </p>
           </div>
         </div>
       </div>

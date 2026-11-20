@@ -1,4 +1,4 @@
-/* Conscious Effort – Login / Sign Up (white + black)
+/* Conscious Effort.in – Login / Sign Up (white + black)
    Fonts: ONLY Playfair Display (headings / brand) + Gill Sans (everything else).
    Everything is scoped inside .sa, so it won't affect the rest of the app. */
 
@@ -248,10 +248,11 @@
     box-shadow: 0 2px 12px rgba(0,0,0,.08);
   }
 
-  /* Brand: Playfair Display */
+  /* Brand: Playfair Display
+     Font size reduced because "#CONSCIOUSEFFORT.IN" is longer (19 characters). */
   .sa .m-brand {
     font-family: var(--sa-serif);
-    font-size: clamp(24px, 7vw, 38px);
+    font-size: clamp(20px, 5.8vw, 34px);
     font-weight: 500;
     letter-spacing: 0.04em;
     line-height: 1.1;
@@ -286,7 +287,7 @@
 }
 @media (max-width: 340px) {
   .sa .label-row { flex-wrap: wrap; }
-  .sa .m-brand { font-size: 21px; letter-spacing: 0.02em; }
+  .sa .m-brand { font-size: 18px; letter-spacing: 0.02em; }
 }
 
 /* Reduced motion: card/brand animations off, but spinner stays (slower) so the user still sees progress */
