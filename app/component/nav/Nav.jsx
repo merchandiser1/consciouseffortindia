@@ -37,6 +37,7 @@ const LOGO_URL =
 // Login + dashboard live inside the "consciousmain" folder
 const LOGIN_HREF = "/consciousmain/login";
 const DASHBOARD_HREF = "/consciousmain/dashboard";
+const ABOUT_HREF = "/consciousmain/about"; // must start with "/" (absolute path)
 
 // Delay so the mobile drawer can close (and unlock body scroll) first
 const DRAWER_CLOSE_MS = 280;
@@ -45,7 +46,7 @@ const LINKS = [
   { label: "Home", href: "/", top: true },
   { label: "Upcoming Events", href: "/#upcoming", hash: "upcoming" },
   { label: "Previous Events", href: "/#previous", hash: "previous" },
-  { label: "About", href: "consciousmain/about" },
+  { label: "About", href: ABOUT_HREF },
   { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
 ];
 
