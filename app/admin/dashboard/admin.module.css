@@ -15,23 +15,42 @@
   position: fixed; top: 0; left: 0; z-index: 30;
   width: 290px; height: 100vh; height: 100dvh;
   display: flex; flex-direction: column;
-  padding: 28px 16px 16px;
+  padding: 20px 16px 16px;
   background: #fff; border-right: 1px solid var(--line);
   overflow-y: auto; overflow-x: hidden;
   overscroll-behavior: contain;
 }
 .sideHead {
-  display: flex; align-items: center; flex-wrap: wrap;
-  gap: 10px 12px; padding: 0 10px; margin-bottom: 30px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0; padding: 0 4px; margin-bottom: 14px;
 }
-.brand {
-  font-size: 15px; font-weight: 500; letter-spacing: 0.18em;
-  color: var(--ink); text-decoration: none; white-space: nowrap;
+
+/* Brand logo (image). Background WHITE hai aur logo white hai,
+   isliye brightness(0) usko black bana deta hai.
+   Agar tera logo already dark hai to filter line hata dena. */
+.brand, .topBrand {
+  display: flex; align-items: center;
+  text-decoration: none; min-width: 0;
 }
+.brandImg {
+  display: block; height: 130px; width: auto; max-width: 100%;
+  object-fit: contain; object-position: left center;
+  filter: brightness(0);
+}
+.topBrandImg {
+  display: block; height: 100px; width: auto; max-width: 100%;
+  object-fit: contain; object-position: left center;
+  filter: brightness(0);
+}
+
 .pill {
   font-style: normal; padding: 4px 12px; border-radius: 999px;
   background: #f3e6d6; color: #8a5a2a; font-size: 12px; font-weight: 600; letter-spacing: 0;
+  white-space: nowrap;
 }
+/* sidebar me pill logo ke neeche, thoda andar */
+.sideHead .pill { margin: -14px 0 0 10px; }
+
 .menuLabel { margin: 0 0 12px; padding: 0 12px; font-size: 12.5px; letter-spacing: 0.1em; color: var(--muted); }
 .nav { display: flex; flex-direction: column; gap: 6px; }
 .link {
@@ -69,10 +88,14 @@
 .logout:hover:not(:disabled) { background: #fff; color: var(--ink); }
 .logout:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.brand:focus-visible, .topBrand:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 /* sidebar: chhoti height wali screens (laptop) ke liye compact */
 @media (min-width: 901px) and (max-height: 760px) {
-  .sidebar { padding: 18px 14px 12px; }
-  .sideHead { margin-bottom: 18px; }
+  .sidebar { padding: 14px 14px 12px; }
+  .sideHead { margin-bottom: 8px; }
+  .brandImg { height: 100px; }
+  .sideHead .pill { margin-top: -10px; }
   .menuLabel { margin-bottom: 8px; }
   .nav { gap: 4px; }
   .link { padding: 10px 14px; font-size: 15px; }
@@ -83,8 +106,10 @@
 }
 
 @media (min-width: 901px) and (max-height: 600px) {
-  .sidebar { padding: 14px 12px 10px; }
-  .sideHead { margin-bottom: 12px; }
+  .sidebar { padding: 10px 12px 10px; }
+  .sideHead { margin-bottom: 4px; }
+  .brandImg { height: 80px; }
+  .sideHead .pill { margin-top: -8px; }
   .menuLabel { display: none; }
   .link { padding: 8px 12px; }
   .bottom { padding-top: 10px; }
@@ -170,23 +195,24 @@
 
   .topbar {
     position: fixed; inset: 0 0 auto 0; z-index: 40;
-    height: calc(60px + env(safe-area-inset-top, 0px));
+    height: calc(72px + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) 18px 0;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
     background: #fff; border-bottom: 1px solid var(--line);
   }
   .topBrand {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; letter-spacing: 0.16em; color: var(--ink);
-    text-decoration: none; white-space: nowrap;
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 4px;
+    color: var(--ink); text-decoration: none; white-space: nowrap;
   }
   .topLogout {
+    flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
     border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); cursor: pointer;
   }
   .main {
     grid-column: 1;
-    padding: calc(60px + env(safe-area-inset-top, 0px) + 20px) 14px calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: calc(72px + env(safe-area-inset-top, 0px) + 20px) 14px calc(88px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Bottom tab bar: saare links HAMESHA ek hi line me (kabhi neeche wrap nahi honge) */
@@ -217,8 +243,19 @@
   }
 }
 
+/* chhote phones: logo + Admin pill + logout ek line me fit ho */
+@media (max-width: 420px) {
+  .topBrandImg { height: 88px; }
+  .topBrand .pill { font-size: 11px; padding: 3px 10px; }
+}
+
+@media (max-width: 380px) {
+  .topBrandImg { height: 76px; }
+}
+
 /* bahut chhote phones (360px se kam): thoda aur compact taaki 5 links fit ho jayein */
 @media (max-width: 360px) {
+  .topBrandImg { height: 68px; }
   .tab { font-size: 9.5px; gap: 3px; }
   .tab svg { width: 20px; height: 20px; }
 }

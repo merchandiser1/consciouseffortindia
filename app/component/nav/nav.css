@@ -7,13 +7,9 @@
   --rm-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* Fonts are loaded in nav.jsx (next/font) and the variables live on this wrapper,
-   so --rm-font / --rm-logo-font must be defined here, not on :root */
 .rm-root {
   --rm-font: var(--font-poppins), "Poppins", "Helvetica Neue", Arial, sans-serif;
   --rm-logo-font: var(--font-jost), "Jost", "Helvetica Neue", Arial, sans-serif;
-  /* Brand logo: elegant serif (#ConsciousEffort India) */
-  --rm-brand-font: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
 }
 
 /* ---------- Header: pure black ---------- */
@@ -48,16 +44,22 @@
   gap: 24px;
 }
 
-/* ---------- Logo (text): #ConsciousEffort India ---------- */
+/* ---------- Logo (image) ---------- */
 .rm-nav__logo {
-  color: var(--rm-ink);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
   text-decoration: none;
-  font-family: var(--rm-brand-font);
-  font-size: 1.55rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1;
-  white-space: nowrap;
+}
+
+.rm-nav__logoImg {
+  display: block;
+  height: 140px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
 }
 
 /* ---------- Right side ---------- */
@@ -112,7 +114,7 @@
   display: none;
 }
 
-/* ---------- Desktop Login / Logout: white button, black text ---------- */
+/* ---------- Desktop Login / Logout ---------- */
 .rm-nav__login {
   display: inline-block;
   padding: 12px 34px;
@@ -133,7 +135,6 @@
   color: #fff;
 }
 
-/* Logout is a <button>, Login is a <Link>: make them look identical */
 button.rm-nav__login {
   font-family: inherit;
   line-height: normal;
@@ -150,6 +151,7 @@ button.rm-nav__login {
 .rm-burger {
   display: none;
   position: relative;
+  flex-shrink: 0;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -177,10 +179,9 @@ button.rm-nav__login {
 .rm-burger span:nth-child(2) { transform: scaleX(0.66); }
 .rm-burger span:nth-child(3) { transform: translateY(7px); }
 
-/* Hover: the short middle line grows */
 .rm-burger:hover span:nth-child(2) { transform: scaleX(1); }
 
-/* ---------- Overlay (above the nav, below the drawer) ---------- */
+/* ---------- Overlay ---------- */
 .rm-overlay {
   position: fixed;
   inset: 0;
@@ -198,7 +199,7 @@ button.rm-nav__login {
   visibility: visible;
 }
 
-/* ---------- Mobile drawer: WHITE (topmost layer) ---------- */
+/* ---------- Mobile drawer: WHITE ---------- */
 .rm-drawer {
   position: fixed;
   top: 0;
@@ -239,25 +240,32 @@ button.rm-nav__login {
   justify-content: space-between;
   gap: 10px;
   flex-shrink: 0;
-  min-height: var(--rm-nav-h);
+  min-height: 96px;
   margin: 0 -24px 6px;
   padding: 0 24px;
   border-bottom: 1px solid #e8e8e8;
 }
 
 .rm-drawer__logo {
-  color: #000;
+  display: flex;
+  align-items: center;
+  min-width: 0;
   text-decoration: none;
-  font-family: var(--rm-brand-font);
-  font-size: 1.15rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.2;
-  /* narrow drawers: let "India" wrap to a 2nd line instead of overflowing */
-  white-space: normal;
 }
 
-/* ---------- Close button: light circle, black X ---------- */
+/* Drawer is WHITE, logo is white => make it black.
+   (If your logo is already dark, delete the filter line.) */
+.rm-drawer__logoImg {
+  display: block;
+  height: 90px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  filter: brightness(0);
+}
+
+/* ---------- Close button ---------- */
 .rm-close {
   position: relative;
   flex-shrink: 0;
@@ -289,7 +297,6 @@ button.rm-nav__login {
 .rm-close span:nth-child(1) { transform: rotate(45deg); }
 .rm-close span:nth-child(2) { transform: rotate(-45deg); }
 
-/* Hover: black circle, white X */
 .rm-close:hover { background: #000; }
 .rm-close:hover span { background: #fff; }
 
@@ -347,7 +354,7 @@ button.rm-nav__login {
   opacity: 1;
 }
 
-/* ---------- Login / Logout at the bottom: black button ---------- */
+/* ---------- Login / Logout at the bottom ---------- */
 .rm-drawer__bottom {
   margin-top: auto;
   padding-top: 28px;
@@ -366,7 +373,6 @@ button.rm-nav__login {
   letter-spacing: 0.06em;
 }
 
-/* Logout is a <button>, Login is a <Link>: make them look identical */
 button.rm-drawer__login {
   width: 100%;
   border: 0;
@@ -499,28 +505,30 @@ button.rm-drawer__login:disabled {
 }
 
 /* ---------- Responsive ---------- */
+
+/* small laptops / big tablets (landscape) */
 @media (max-width: 1100px) and (min-width: 992px) {
-  /* logo is wider now: tighten links so everything fits on small laptops */
-  .rm-nav__logo { font-size: 1.35rem; }
+  .rm-nav__logoImg { height: 120px; }
   .rm-nav__link { padding: 10px 12px; }
   .rm-nav__link::after { left: 12px; right: 12px; }
 }
 
+/* tablet + mobile: hamburger layout */
 @media (max-width: 991px) {
-  :root { --rm-nav-h: 68px; }
+  :root { --rm-nav-h: 76px; }
 
   .rm-nav__right { display: none; }
   .rm-burger { display: block; margin-right: -10px; }
-  .rm-nav__logo { font-size: 1.3rem; }
+  .rm-nav__logoImg { height: 120px; }
 }
 
 @media (max-width: 420px) {
-  .rm-nav__logo { font-size: 1.12rem; }
+  .rm-nav__logoImg { height: 105px; }
 }
 
 @media (max-width: 360px) {
-  .rm-nav__logo { font-size: 1rem; }
-  .rm-drawer__logo { font-size: 1rem; }
+  .rm-nav__logoImg { height: 90px; }
+  .rm-drawer__logoImg { height: 76px; }
 }
 
 @media (min-width: 992px) {

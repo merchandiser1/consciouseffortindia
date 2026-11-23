@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Poppins, Jost, Playfair_Display } from "next/font/google";
+import { Poppins, Jost } from "next/font/google";
 import "./nav.css";
 
 // Fonts are loaded HERE, so no change is needed in layout.js
@@ -21,16 +21,9 @@ const jost = Jost({
   display: "swap",
 });
 
-// Logo font (elegant high-contrast serif)
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
 const BRAND_TITLE = "Saahra";
-const LOGO_TEXT = "#ConsciousEffort India";
+const LOGO_ALT = "#ConsciousEffort India";
+const LOGO_SRC = "/logo.png"; // file: public/logo.png
 const LOGO_URL =
   "https://www.saahra.com/pages/conscious-effort-design-show-and-conclave";
 
@@ -54,10 +47,6 @@ const SECTION_IDS = ["upcoming", "previous"];
 
 /* ------------------------------------------------------------------
    AUTH CHECK (module level => shared by ALL Nav instances)
-   - in-flight dedupe: only one request at a time
-   - burst guard: no new request within 2s of the last one
-   - logged-in cache: no new request within 30s if user is authed
-   - logged-out is NOT cached long, so right after login it re-checks
 ------------------------------------------------------------------- */
 const BURST_GAP_MS = 2000;
 const AUTHED_CACHE_MS = 30000;
@@ -67,7 +56,6 @@ let lastResult = false;
 let lastAt = 0;
 
 async function checkAuth(force = false) {
-  // Someone already asking the server -> reuse that same request
   if (inFlight) return inFlight;
 
   if (!force) {
@@ -87,14 +75,13 @@ async function checkAuth(force = false) {
       if (res.ok && data.authenticated === true) {
         lastResult = true;
       } else if (res.status === 401 || data.authenticated === false) {
-        lastResult = false; // server clearly says: no session
+        lastResult = false;
       }
-      // any other error (500, timeout, bad JSON): keep the previous state
 
       lastAt = Date.now();
       return lastResult;
     } catch {
-      return lastResult; // network error: keep previous state
+      return lastResult;
     } finally {
       inFlight = null;
     }
@@ -137,25 +124,19 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
 
-  // Button is ALWAYS visible: shows "Login" by default,
-  // turns into "Logout" as soon as the server confirms a session.
   const [authed, setAuthed] = useState(false);
   const [loginPrompt, setLoginPrompt] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
 
-  // Active link logic:
-  // - Home is never shown as active
-  // - section links (#upcoming / #previous) are active while that section is on screen
-  // - other links are active when the path matches
   const isActive = (link) => {
     if (link.top) return false;
     if (link.hash) return pathname === "/" && activeSection === link.hash;
     return pathname.startsWith(link.href);
   };
 
-  // Smooth scrolling for the whole site (also covers hash navigation from other pages)
+  // Smooth scrolling for the whole site
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.style.scrollBehavior;
@@ -195,19 +176,16 @@ export default function Nav() {
     return () => io.disconnect();
   }, [pathname]);
 
-  // Click on "Upcoming Events" / "Previous Events"
   const onHashClick = (e, id) => {
     e.preventDefault();
     const wasOpen = open;
     close();
 
-    // On another page: go home with the hash (browser scrolls to the section)
     if (pathname !== "/") {
       router.push(`/#${id}`);
       return;
     }
 
-    // Already on home: smooth scroll
     setTimeout(
       () => {
         const el = document.getElementById(id);
@@ -219,11 +197,10 @@ export default function Nav() {
     );
   };
 
-  // Click on "Home": if already on home, smooth scroll to top
   const onHomeClick = (e) => {
     const wasOpen = open;
     close();
-    if (pathname !== "/") return; // normal navigation to "/"
+    if (pathname !== "/") return;
 
     e.preventDefault();
     setTimeout(
@@ -235,7 +212,6 @@ export default function Nav() {
     );
   };
 
-  // Ask the server (deduped + throttled) if the cookie is a valid session
   const refreshAuth = useCallback(async (force = false) => {
     const ok = await checkAuth(force);
     setAuthed(ok);
@@ -248,21 +224,18 @@ export default function Nav() {
     setPrimary(all[0] === rootRef.current);
   }, [pathname]);
 
-  // Re-check on first load and after every page change (covers login / logout)
-  // Only the visible (primary) Nav does this.
   useEffect(() => {
     if (!primary) return;
     refreshAuth();
   }, [pathname, primary, refreshAuth]);
 
-  // Re-check when the tab becomes active again / page restored from back button
   useEffect(() => {
     if (!primary) return;
     const onVisible = () => {
       if (document.visibilityState === "visible") refreshAuth();
     };
     const onShow = (e) => {
-      if (e.persisted) refreshAuth(true); // only for bfcache restore
+      if (e.persisted) refreshAuth(true);
     };
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("pageshow", onShow);
@@ -272,17 +245,15 @@ export default function Nav() {
     };
   }, [primary, refreshAuth]);
 
-  // Dashboard link: logged in => normal navigation, otherwise show the popup
   const onProtectedClick = async (e) => {
     close();
-    if (authed) return; // let <Link> navigate
+    if (authed) return;
     e.preventDefault();
-    const ok = await refreshAuth(true); // session may have just changed
+    const ok = await refreshAuth(true);
     if (ok) router.push(DASHBOARD_HREF);
     else setLoginPrompt(true);
   };
 
-  // Picks the right click handler for each link
   const handlerFor = (l) => {
     if (l.protected) return onProtectedClick;
     if (l.hash) return (e) => onHashClick(e, l.hash);
@@ -290,7 +261,6 @@ export default function Nav() {
     return close;
   };
 
-  // Tap on "Logout": clear the cookie, then reload so every page forgets the session
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -302,22 +272,20 @@ export default function Nav() {
       });
       if (!res.ok) throw new Error("logout failed");
       resetAuthCache(false);
-      setAuthed(false); // button turns back into "Login" immediately
+      setAuthed(false);
       window.location.replace(
         pathname.startsWith(DASHBOARD_HREF) ? LOGIN_HREF : pathname
       );
     } catch {
       setLoggingOut(false);
-      await refreshAuth(true); // logout failed: show the real state
+      await refreshAuth(true);
     }
   };
 
-  // Close the drawer on route change
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Track scrolled state
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -325,7 +293,6 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll while the drawer or popup is open
   useEffect(() => {
     document.body.style.overflow = open || loginPrompt ? "hidden" : "";
     return () => {
@@ -333,7 +300,6 @@ export default function Nav() {
     };
   }, [open, loginPrompt]);
 
-  // Close on Esc key, and when the window is resized to desktop width
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -354,7 +320,7 @@ export default function Nav() {
     <div
       ref={rootRef}
       data-rm-nav
-      className={`rm-root ${poppins.variable} ${jost.variable} ${playfair.variable}`}
+      className={`rm-root ${poppins.variable} ${jost.variable}`}
       style={{ display: primary ? "contents" : "none" }}
     >
       <div
@@ -362,9 +328,9 @@ export default function Nav() {
         className={`rm-nav ${scrolled ? "rm-nav--scrolled" : ""} ${open ? "rm-nav--open" : ""}`}
       >
         <div className="rm-nav__inner">
-          {/* Logo: #ConsciousEffort India */}
-          <a href={LOGO_URL} className="rm-nav__logo">
-            {LOGO_TEXT}
+          {/* Logo image */}
+          <a href={LOGO_URL} className="rm-nav__logo" aria-label={LOGO_ALT}>
+            <img src={LOGO_SRC} alt={LOGO_ALT} className="rm-nav__logoImg" />
           </a>
 
           {/* Right side */}
@@ -388,7 +354,6 @@ export default function Nav() {
               ))}
             </div>
 
-            {/* One button: Login <-> Logout (never hidden) */}
             {authed ? (
               <button
                 type="button"
@@ -428,21 +393,25 @@ export default function Nav() {
         aria-hidden="true"
       />
 
-      {/* Mobile drawer: slides in from the left (white) */}
+      {/* Mobile drawer */}
       <aside
         id="rm-mobile-drawer"
         className={`rm-drawer ${open ? "is-open" : ""}`}
         aria-hidden={!open}
       >
-        {/* Top row: logo text + close button */}
         <div className="rm-drawer__head">
           <a
             href={LOGO_URL}
             className="rm-drawer__logo"
+            aria-label={LOGO_ALT}
             tabIndex={open ? 0 : -1}
             onClick={close}
           >
-            {LOGO_TEXT}
+            <img
+              src={LOGO_SRC}
+              alt={LOGO_ALT}
+              className="rm-drawer__logoImg"
+            />
           </a>
           <button
             type="button"
@@ -476,7 +445,6 @@ export default function Nav() {
           ))}
         </div>
 
-        {/* Login / Logout button at the bottom (same button, never hidden) */}
         <div className="rm-drawer__bottom">
           {authed ? (
             <button
@@ -502,7 +470,7 @@ export default function Nav() {
         </div>
       </aside>
 
-      {/* "Please login" popup (shown when a logged-out user clicks Dashboard) */}
+      {/* "Please login" popup */}
       {loginPrompt && (
         <div className="rm-modal-overlay" onClick={() => setLoginPrompt(false)}>
           <div

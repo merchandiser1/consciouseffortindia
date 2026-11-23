@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Jost, Cormorant_Garamond, Playfair_Display } from "next/font/google";
+import { Jost, Cormorant_Garamond } from "next/font/google";
 import styles from "./dashboard.module.css";
 
 const jost = Jost({
@@ -20,15 +20,8 @@ const serif = Cormorant_Garamond({
   display: "swap",
 });
 
-// Brand logo font (same as the main navbar)
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-brand",
-  display: "swap",
-});
-
 const BRAND = "#ConsciousEffort India";
+const LOGO_SRC = "/logo.png"; // file: public/logo.png
 const BASE = "/consciousmain/dashboard";
 const LOGIN_HREF = "/consciousmain/login";
 
@@ -89,7 +82,7 @@ const LINKS = [
   { label: "Browse Showcases", href: `${BASE}/showcases`, Icon: SparkIcon },
 ];
 
-/* Mobile bottom tab order (Home last, like a mobile app) */
+/* Mobile bottom tab order */
 const TABS = [
   { label: "Applications", href: `${BASE}/applications`, Icon: GridIcon },
   { label: "Payments", href: `${BASE}/payments`, Icon: RupeeIcon },
@@ -149,13 +142,11 @@ export default function DashboardShell({ user, children }) {
   const initial = (user?.username || "U").trim().charAt(0).toUpperCase();
 
   return (
-    <div
-      className={`${styles.shell} ${jost.variable} ${serif.variable} ${playfair.variable}`}
-    >
-      {/* ---------- Mobile top bar (brand + profile menu) ---------- */}
+    <div className={`${styles.shell} ${jost.variable} ${serif.variable}`}>
+      {/* ---------- Mobile top bar (logo + profile menu) ---------- */}
       <header className={styles.topbar}>
-        <Link href="/" className={styles.topBrand}>
-          {BRAND}
+        <Link href="/" className={styles.topBrand} aria-label={BRAND}>
+          <img src={LOGO_SRC} alt={BRAND} className={styles.topBrandImg} />
         </Link>
 
         <div className={styles.menuWrap} ref={menuRef}>
@@ -198,8 +189,8 @@ export default function DashboardShell({ user, children }) {
       {/* ---------- Desktop sidebar ---------- */}
       <aside className={styles.sidebar} aria-label="Dashboard menu">
         <div className={styles.sideHead}>
-          <Link href="/" className={styles.brand}>
-            {BRAND}
+          <Link href="/" className={styles.brand} aria-label={BRAND}>
+            <img src={LOGO_SRC} alt={BRAND} className={styles.brandImg} />
           </Link>
         </div>
 

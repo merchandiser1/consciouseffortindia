@@ -40,7 +40,7 @@
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 28px 16px 16px;
+  padding: 20px 16px 16px;
   background: #fff;
   border-right: 1px solid var(--line);
   overflow-y: auto;
@@ -50,23 +50,40 @@
 .sideHead {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 10px;
-  margin-bottom: 30px;
+  justify-content: flex-start;
+  padding: 0 4px;
+  margin-bottom: 14px;
 }
 
-/* Brand logo: #ConsciousEffort India (Playfair Display, same as navbar) */
+/* Brand logo (image). Backgrounds here are WHITE and the logo is white,
+   so brightness(0) turns it black. If your logo is already dark,
+   delete the filter lines. */
 .brand,
 .topBrand {
-  font-family: var(--font-brand), Georgia, "Times New Roman", serif;
-  font-size: 1.2rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.15;
-  color: var(--ink);
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  /* sidebar tang ho to "India" neeche aa jaye, overflow na ho */
-  white-space: normal;
+  min-width: 0;
+}
+
+.brandImg {
+  display: block;
+  height: 130px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  filter: brightness(0);
+}
+
+.topBrandImg {
+  display: block;
+  height: 100px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  filter: brightness(0);
 }
 
 .menuLabel {
@@ -209,8 +226,9 @@
 
 /* sidebar: chhoti height wali screens ke liye compact */
 @media (min-width: 901px) and (max-height: 760px) {
-  .sidebar { padding: 18px 14px 12px; }
-  .sideHead { margin-bottom: 18px; }
+  .sidebar { padding: 14px 14px 12px; }
+  .sideHead { margin-bottom: 8px; }
+  .brandImg { height: 100px; }
   .menuLabel { margin-bottom: 8px; }
   .nav { gap: 4px; }
   .link { padding: 10px 14px; font-size: 15px; }
@@ -222,8 +240,9 @@
 
 /* bahut chhoti height (jaise 550px) */
 @media (min-width: 901px) and (max-height: 600px) {
-  .sidebar { padding: 14px 12px 10px; }
-  .sideHead { margin-bottom: 12px; }
+  .sidebar { padding: 10px 12px 10px; }
+  .sideHead { margin-bottom: 4px; }
+  .brandImg { height: 80px; }
   .menuLabel { display: none; }
   .link { padding: 8px 12px; }
   .bottom { padding-top: 10px; }
@@ -231,7 +250,7 @@
 }
 
 /* =========================================================
-   MAIN  (outer card removed — pages sit directly on the page bg)
+   MAIN
    ========================================================= */
 .main {
   grid-column: 2;
@@ -512,14 +531,13 @@
 }
 
 /* =========================================================
-   MOBILE — app look: top bar + bottom tab bar, no drawer
+   MOBILE / TABLET — app look: top bar + bottom tab bar
    ========================================================= */
 @media (max-width: 900px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* sidebar is desktop only */
   .sidebar {
     display: none;
   }
@@ -531,23 +549,25 @@
     left: 0;
     right: 0;
     z-index: 40;
-    height: calc(60px + env(safe-area-inset-top, 0px));
+    height: calc(72px + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) 18px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     background: #fff;
     border-bottom: 1px solid var(--line);
   }
 
   .topBrand {
-    font-size: 1.25rem;
-    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
   }
 
   /* ---------- profile avatar + dropdown ---------- */
   .menuWrap {
     position: relative;
+    flex-shrink: 0;
   }
 
   .topAvatar {
@@ -682,7 +702,7 @@
   /* ---------- content: flat, app-like ---------- */
   .main {
     grid-column: 1;
-    padding: calc(60px + env(safe-area-inset-top, 0px) + 20px) 16px
+    padding: calc(72px + env(safe-area-inset-top, 0px) + 20px) 16px
       calc(84px + env(safe-area-inset-bottom, 0px));
   }
 
@@ -772,10 +792,16 @@
   }
 }
 
-/* bahut chhote phones: logo + avatar ek line mein fit ho */
-@media (max-width: 360px) {
-  .topBrand {
-    font-size: 1.1rem;
+/* chhote phones: logo + avatar ek line mein fit ho */
+@media (max-width: 380px) {
+  .topBrandImg {
+    height: 84px;
+  }
+}
+
+@media (max-width: 340px) {
+  .topBrandImg {
+    height: 72px;
   }
 }
 
@@ -793,4 +819,3 @@
     animation: none;
   }
 }
-

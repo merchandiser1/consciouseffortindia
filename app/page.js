@@ -54,7 +54,7 @@ const pastEvents = [
     month: "October, 2026",
     venue: "The Lodhi, Delhi",
     tags: "Fashion, Fine Jewels, Accessories, Bags & Home",
-    img: "/new1.jpg",
+    img: "/hyd aug.jpg",
   },
   {
     year: "2026",

@@ -9,7 +9,8 @@ import styles from "./admin.module.css";
 const jost = Jost({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-ui", display: "swap" });
 const serif = Cormorant_Garamond({ subsets: ["latin"], weight: ["500", "600"], variable: "--font-serif", display: "swap" });
 
-const BRAND = "#CONSCIOUSEFFORT";
+const BRAND = "#ConsciousEffort India";
+const LOGO_SRC = "/logo.png"; // file: public/logo.png
 const BASE = "/admin/dashboard";
 
 const Svg = ({ children, size = 20 }) => (
@@ -69,18 +70,23 @@ export default function AdminShell({ payBadge = 0, children }) {
 
   return (
     <div className={`${styles.shell} ${jost.variable} ${serif.variable}`}>
+      {/* ---------- Mobile top bar ---------- */}
       <header className={styles.topbar}>
-        <Link href="/" className={styles.topBrand}>
-          {BRAND} <em className={styles.pill}>Admin</em>
+        <Link href="/" className={styles.topBrand} aria-label={BRAND}>
+          <img src={LOGO_SRC} alt={BRAND} className={styles.topBrandImg} />
+          <em className={styles.pill}>Admin</em>
         </Link>
         <button type="button" className={styles.topLogout} onClick={logout} disabled={busy} aria-label="Logout">
           <LogoutIcon size={18} />
         </button>
       </header>
 
+      {/* ---------- Desktop sidebar ---------- */}
       <aside className={styles.sidebar} aria-label="Admin menu">
         <div className={styles.sideHead}>
-          <Link href="/" className={styles.brand}>{BRAND}</Link>
+          <Link href="/" className={styles.brand} aria-label={BRAND}>
+            <img src={LOGO_SRC} alt={BRAND} className={styles.brandImg} />
+          </Link>
           <span className={styles.pill}>Admin</span>
         </div>
 
@@ -117,6 +123,7 @@ export default function AdminShell({ payBadge = 0, children }) {
 
       <main className={styles.main}>{children}</main>
 
+      {/* ---------- Mobile bottom tab bar ---------- */}
       <nav className={styles.tabbar} aria-label="Admin tabs">
         {links.map((l) => {
           const active = isActive(l);
