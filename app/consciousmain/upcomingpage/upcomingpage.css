@@ -18,7 +18,8 @@
    ========================================================= */
 .up-heroSec {
   width: 100%;
-  padding: calc(var(--rm-nav-h, 154px) + 5px) 0 0;
+  /* fixed nav ke neeche se shuru, koi extra gap nahi */
+  padding: var(--rm-nav-h, 162px) 0 0;
   background: #fff;
   line-height: 0;
 }
@@ -427,10 +428,6 @@
 
 /* ---------- Mobile ---------- */
 @media (max-width: 900px) {
-  .up-heroSec {
-    padding-top: calc(var(--rm-nav-h, 76px) + 14px);
-  }
-
   .up-hero {
     height: clamp(360px, 70vw, 460px);
   }
@@ -472,10 +469,6 @@
 
 /* ---------- Small mobile ---------- */
 @media (max-width: 480px) {
-  .up-heroSec {
-    padding-top: calc(var(--rm-nav-h, 68px) + 10px);
-  }
-
   .up-hero {
     height: auto;
     min-height: 380px;

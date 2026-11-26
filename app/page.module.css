@@ -3,12 +3,12 @@
    ========================================================= */
 .videoSec {
   width: 100%;
-  /* fixed nav ke neeche se shuru (nav.css ka --rm-nav-h use hota hai) */
-  padding: calc(var(--rm-nav-h, 154px) + 5px) 0 0; /* 24px = nav aur video ke beech gap */
+  /* fixed nav ke neeche se shuru. Nav ki height = --rm-nav-h (nav.css),
+     isliye koi extra gap nahi */
+  padding: var(--rm-nav-h, 162px) 0 0;
   background: #fff;
   line-height: 0;
 }
-
 
 .pastMore {
   display: flex;
@@ -99,7 +99,7 @@
 .sponsors,
 .seen,
 .enquiry {
-  scroll-margin-top: 30px;
+  scroll-margin-top: calc(var(--rm-nav-h, 162px) + 10px);
 }
 
 .eyebrow {
@@ -847,10 +847,6 @@
 
 /* ---------- Mobile ---------- */
 @media (max-width: 900px) {
-  .videoSec {
-    padding-top: calc(var(--rm-nav-h, 76px) + 14px);
-  }
-
   .video {
     height: auto;
     min-height: 0;
@@ -945,6 +941,7 @@
   .enquiry .sectionHead {
     margin-bottom: 22px;
   }
+
   .pastMore {
     margin-top: 36px;
   }
@@ -973,10 +970,6 @@
 
 /* ---------- Small mobile ---------- */
 @media (max-width: 480px) {
-  .videoSec {
-    padding-top: calc(var(--rm-nav-h, 68px) + 10px);
-  }
-
   .btn {
     justify-content: center;
     padding: 16px 24px;

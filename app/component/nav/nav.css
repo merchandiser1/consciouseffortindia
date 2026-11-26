@@ -2,8 +2,10 @@
   --rm-ink: #ffffff;
   --rm-bg: #000;
   --rm-muted: #9a9a9a;
-  /* total fixed header height (logo row + links row) */
-  --rm-nav-h: 140px;
+  /* total fixed header height (logo row + links row).
+     Nav ki height ab EXACT isi value par fix hai, isliye
+     pages ke upar white gap nahi aayega. */
+  --rm-nav-h: 162px;
   --rm-drawer-w: clamp(280px, 78vw, 380px);
   --rm-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -28,7 +30,8 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  min-height: var(--rm-nav-h);
+  box-sizing: border-box;
+  height: var(--rm-nav-h); /* fixed => page offset ke saath exact match */
   background: var(--rm-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--rm-font);
@@ -44,6 +47,7 @@
 
 .rm-nav__inner {
   max-width: 1360px;
+  height: 100%;
   margin: 0 auto;
   padding: 0 clamp(20px, 4vw, 56px);
   display: flex;
@@ -57,14 +61,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 22px 0 4px;
+  flex: 1; /* bachi hui height le leta hai, links row neeche */
+  min-height: 0;
+  padding: 30px 0 4px; /* upar se extra space */
 }
 
 .rm-nav__logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 64px; /* sirf itna hissa dikhega */
+  height: 72px; /* sirf itna hissa dikhega */
   overflow: hidden; /* logo image ka extra khali part kat jayega */
   min-width: 0;
   text-decoration: none;
@@ -72,7 +78,7 @@
 
 .rm-nav__logoImg {
   display: block;
-  height: 150px; /* image ka asli size, box se bada */
+  height: 168px; /* image ka asli size, box se bada (logo bada dikhega) */
   width: auto;
   max-width: none;
   flex-shrink: 0;
@@ -428,15 +434,21 @@ button.rm-nav__login {
   justify-content: space-between;
   gap: 10px;
   flex-shrink: 0;
-  min-height: 84px;
+  min-height: 96px;
   margin: 0 -24px 6px;
   padding: 0 24px;
   border-bottom: 1px solid #e8e8e8;
 }
 
+/* logo ka extra khali hissa kaatne ke liye box + overflow hidden
+   (bilkul navbar jaisa), isse logo bada dikhta hai */
 .rm-drawer__logo {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  height: 58px;
+  overflow: hidden;
   min-width: 0;
   text-decoration: none;
 }
@@ -445,9 +457,10 @@ button.rm-nav__login {
    (If your logo is already dark, delete the filter line.) */
 .rm-drawer__logoImg {
   display: block;
-  height: 60px;
+  height: 134px;
   width: auto;
-  max-width: 100%;
+  max-width: none;
+  flex-shrink: 0;
   object-fit: contain;
   object-position: left center;
   filter: brightness(0);
@@ -757,37 +770,40 @@ button.rm-drawer__login:disabled {
 
 /* small laptops / big tablets (landscape) */
 @media (max-width: 1100px) and (min-width: 992px) {
-  :root { --rm-nav-h: 132px; }
-  .rm-nav__logo { height: 56px; }
-  .rm-nav__logoImg { height: 130px; }
+  :root { --rm-nav-h: 154px; }
+  .rm-nav__top { padding-top: 26px; }
+  .rm-nav__logo { height: 66px; }
+  .rm-nav__logoImg { height: 154px; }
   .rm-nav__link { padding: 10px 12px; font-size: 0.88rem; }
   .rm-nav__link::after { left: 12px; right: 12px; }
 }
 
 /* tablet + mobile: hamburger layout (logo centered, burger right) */
 @media (max-width: 991px) {
-  :root { --rm-nav-h: 76px; }
+  :root { --rm-nav-h: 88px; }
 
   .rm-nav__bar { display: none; }
   .rm-burger { display: block; }
 
-  .rm-nav__top { padding: 6px 0; }
-  .rm-nav__logo { height: 56px; }
-  .rm-nav__logoImg { height: 120px; }
+  .rm-nav__top { padding: 12px 0 4px; }
+  .rm-nav__logo { height: 62px; }
+  .rm-nav__logoImg { height: 144px; }
 }
 
 @media (max-width: 420px) {
-  :root { --rm-nav-h: 68px; }
-  .rm-nav__top { padding: 6px 0; }
-  .rm-nav__logo { height: 48px; }
-  .rm-nav__logoImg { height: 104px; }
+  :root { --rm-nav-h: 80px; }
+  .rm-nav__top { padding: 10px 0 4px; }
+  .rm-nav__logo { height: 56px; }
+  .rm-nav__logoImg { height: 130px; }
 }
 
 @media (max-width: 360px) {
-  :root { --rm-nav-h: 62px; }
-  .rm-nav__logo { height: 42px; }
-  .rm-nav__logoImg { height: 90px; }
-  .rm-drawer__logoImg { height: 50px; }
+  :root { --rm-nav-h: 74px; }
+  .rm-nav__top { padding: 9px 0 3px; }
+  .rm-nav__logo { height: 50px; }
+  .rm-nav__logoImg { height: 116px; }
+  .rm-drawer__logo { height: 50px; }
+  .rm-drawer__logoImg { height: 116px; }
 }
 
 @media (min-width: 992px) {

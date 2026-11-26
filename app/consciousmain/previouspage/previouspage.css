@@ -18,8 +18,8 @@
    ========================================================= */
 .pv-heroSec {
   width: 100%;
-  /* fixed nav ke neeche se shuru */
-  padding: calc(var(--rm-nav-h, 154px) + 5px) 0 0;
+  /* fixed nav ke neeche se shuru, koi extra gap nahi */
+  padding: var(--rm-nav-h, 162px) 0 0;
   background: #fff;
   line-height: 0;
 }
@@ -357,10 +357,6 @@
 
 /* ---------- Mobile ---------- */
 @media (max-width: 900px) {
-  .pv-heroSec {
-    padding-top: calc(var(--rm-nav-h, 76px) + 14px);
-  }
-
   .pv-hero {
     height: clamp(360px, 70vw, 460px);
   }
@@ -403,10 +399,6 @@
 
 /* ---------- Small mobile ---------- */
 @media (max-width: 480px) {
-  .pv-heroSec {
-    padding-top: calc(var(--rm-nav-h, 68px) + 10px);
-  }
-
   .pv-hero {
     height: auto;
     min-height: 380px;

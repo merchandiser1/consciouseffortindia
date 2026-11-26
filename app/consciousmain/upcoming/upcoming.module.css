@@ -4,7 +4,6 @@
    ========================================================= */
 
 .page {
-  --nav: 84px; /* height of your fixed Nav — change if needed */
   --ink: #000;
   --text: #222;
   --muted: #555;
@@ -12,6 +11,8 @@
   --ivory: #faf9f7;
 
   width: 100%;
+  /* fixed nav ke neeche se shuru (nav.css ka --rm-nav-h), koi extra gap nahi */
+  padding-top: var(--rm-nav-h, 162px);
   background: #fff;
   color: var(--text);
   overflow-x: clip;
@@ -31,7 +32,6 @@
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   min-height: 440px;
-  padding-top: 70px;
   background: #fff;
 }
 
@@ -48,14 +48,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
   display: block;
 }
-
-
-
-
-
 
 .heroInfo {
   position: relative;
@@ -316,7 +311,8 @@
    APPLY
    ========================================================= */
 .apply {
-  scroll-margin-top: 80px;
+  /* "Apply for the Event" par scroll karne par form nav ke neeche na chhupe */
+  scroll-margin-top: var(--rm-nav-h, 88px);
   background: linear-gradient(#fff, var(--ivory) 70%);
   padding: clamp(36px, 4.5vw, 56px) 24px clamp(64px, 7vw, 96px);
 }
@@ -443,7 +439,6 @@
   font-size: 10px;
   color: #6b5c44;
 }
-
 
 .panelLeaf {
   position: absolute;
@@ -747,20 +742,19 @@
 
 /* ---------- Tablet / mobile: stack ---------- */
 @media (max-width: 860px) {
-  .page {
-    --nav: 76px;
-  }
-
   .hero {
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
-    padding-top: 56px;
   }
 
+  /* image ab mobile par bhi dikhegi: align-self:start se grid stretch band,
+     aur aspect-ratio se height milti hai */
   .heroMedia {
+    align-self: start;
+    width: 100%;
     min-height: 0;
+    max-height: none;
     aspect-ratio: 16 / 10;
-    max-height: 340px;
   }
 
   .heroInfo {
@@ -788,6 +782,15 @@
   .apply {
     padding: 36px 20px 60px;
   }
+
+  /* apply card: panel upar, form neeche */
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panelMail {
+    margin-top: 0;
+  }
 }
 
 /* ---------- Mobile ---------- */
@@ -812,9 +815,6 @@
     aspect-ratio: 4 / 3;
   }
 
-
-
-
   .heroInfo {
     padding: 32px 20px 42px;
   }
@@ -822,6 +822,11 @@
   .heroInfo .btn,
   .heroInfo .fade:last-child {
     width: 100%;
+  }
+
+  .heroLeaf,
+  .panelLeaf {
+    display: none;
   }
 
   .about {
@@ -838,6 +843,14 @@
 
   .card {
     padding: 0;
+  }
+
+  .panel {
+    padding: 26px 20px 28px;
+  }
+
+  .formSide {
+    padding: 28px 18px 34px;
   }
 
   .submit,
@@ -860,47 +873,10 @@
     padding: 15px 18px;
     font-size: 14px;
   }
-
 }
-
-
-/* ---------- Apply card: stack panel above form ---------- */
-@media (max-width: 860px) {
-  .card {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .panelMail {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .panel {
-    padding: 26px 20px 28px;
-  }
-
-  .formSide {
-    padding: 28px 18px 34px;
-  }
-}
-
-
-@media (max-width: 480px) {
-  .heroLeaf,
-  .panelLeaf {
-    display: none;
-  }
-
-}
-
-
-
-
 
 /* =========================================================
-   PASTE THIS AT THE VERY END OF upcoming.module.css
-   (submit loading state + success popup)
+   Submit loading state + popups (login / success)
    ========================================================= */
 
 /* ---------- Disabled / submitting button ---------- */
@@ -921,7 +897,7 @@
   transform: none;
 }
 
-/* ---------- Success popup ---------- */
+/* ---------- Popup ---------- */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -1024,7 +1000,6 @@
     animation: none;
   }
 }
-
 
 /* ---------- Login required box ---------- */
 .gate {
