@@ -25,7 +25,16 @@ const SIGNUP_SUCCESS = "Your account has been created successfully. Please log i
 const RESET_SUCCESS = "Your password has been changed successfully. Please log in with your new password.";
 const EMPTY_RECOVERY = { email: "", otp: "", password: "", confirm: "", resetToken: "" };
 
+const DEFAULT_AFTER_LOGIN = "/consciousmain/dashboard";
+
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+// ?next=/some/path -> sirf apni site ke path allow (open redirect se bachne ke liye)
+const getNext = () => {
+  if (typeof window === "undefined") return null;
+  const n = new URLSearchParams(window.location.search).get("next");
+  return n && n.startsWith("/") && !n.startsWith("//") && !n.startsWith("/\\") ? n : null;
+};
 
 /* ---------- validators (same rules as the backend: authValidation.js) ---------- */
 const usernameError = (u) => {
@@ -257,9 +266,10 @@ export default function Login() {
     if (Object.keys(er).length) return;
     run(async () => {
       await api("/api/auth/login", { identifier: login.identifier.trim(), password: login.password });
-      router.push("/consciousmain/dashboard"); // your redirect route after login
+      // ?next= hai (jaise application form se aaya) toh wahin wapas, nahi toh dashboard
+      router.push(getNext() || DEFAULT_AFTER_LOGIN);
       router.refresh();
-      return "keep-loading"; // spinner keeps going until the dashboard opens
+      return "keep-loading"; // spinner keeps going until the next page opens
     });
   };
 

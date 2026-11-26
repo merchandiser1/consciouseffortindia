@@ -30,20 +30,19 @@ const LOGO_URL =
 // Login + dashboard live inside the "consciousmain" folder
 const LOGIN_HREF = "/consciousmain/login";
 const DASHBOARD_HREF = "/consciousmain/dashboard";
-const ABOUT_HREF = "/consciousmain/about"; // must start with "/" (absolute path)
+const ABOUT_HREF = "/consciousmain/about";
+const APPLY_HREF = "/consciousmain/upcoming"; // "Apply for the Event" => application form
+const UPCOMING_HREF = "/consciousmain/upcomingpage"; // Upcoming Events page
+const PREVIOUS_HREF = "/consciousmain/previouspage"; // Previous Events page
 
-// Delay so the mobile drawer can close (and unlock body scroll) first
-const DRAWER_CLOSE_MS = 280;
-
-const LINKS = [
-  { label: "Home", href: "/", top: true },
-  { label: "Upcoming Events", href: "/#upcoming", hash: "upcoming" },
-  { label: "Previous Events", href: "/#previous", hash: "previous" },
-  { label: "About", href: ABOUT_HREF },
-  { label: "Dashboard", href: DASHBOARD_HREF, protected: true },
-];
-
-const SECTION_IDS = ["upcoming", "previous"];
+// ✏️ UPCOMING EVENT DETAILS — yahan se edit karo
+const EVENT = {
+  city: "Hyderabad",
+  name: "#ConsciousEffort India",
+  date: "12th December, 2026",
+  venue: "The Quorum, Hyderabad",
+  categories: "Fashion, Fine Jewels, Accessories, Bags & Home",
+};
 
 /* ------------------------------------------------------------------
    AUTH CHECK (module level => shared by ALL Nav instances)
@@ -115,6 +114,25 @@ function Arrow() {
   );
 }
 
+function Chevron({ className = "" }) {
+  return (
+    <svg
+      className={`rm-chev ${className}`}
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -122,19 +140,27 @@ export default function Nav() {
   const [primary, setPrimary] = useState(true);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
+
+  // desktop dropdown: null | "apply" | "events"
+  const [menu, setMenu] = useState(null);
+  // mobile drawer accordion: "" | "apply" | "events"
+  const [acc, setAcc] = useState("");
 
   const [authed, setAuthed] = useState(false);
   const [loginPrompt, setLoginPrompt] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
+  const closeMenu = useCallback(() => setMenu(null), []);
 
-  const isActive = (link) => {
-    if (link.top) return false;
-    if (link.hash) return pathname === "/" && activeSection === link.hash;
-    return pathname.startsWith(link.href);
-  };
+  const previousActive = pathname.startsWith(PREVIOUS_HREF);
+  const upcomingActive = pathname.startsWith(UPCOMING_HREF);
+  const eventsActive = previousActive || upcomingActive;
+  // "/consciousmain/upcoming" exact ya uske andar ke pages (upcomingpage match nahi hoga)
+  const applyActive =
+    pathname === APPLY_HREF || pathname.startsWith(APPLY_HREF + "/");
+  const aboutActive = pathname.startsWith(ABOUT_HREF);
+  const dashActive = pathname.startsWith(DASHBOARD_HREF);
 
   // Smooth scrolling for the whole site
   useEffect(() => {
@@ -146,70 +172,15 @@ export default function Nav() {
     };
   }, []);
 
-  // Highlight the nav link of the section currently in the middle of the screen
-  useEffect(() => {
-    if (pathname !== "/") {
-      setActiveSection("");
-      return;
-    }
-
-    const els = SECTION_IDS.map((id) => document.getElementById(id)).filter(
-      Boolean
-    );
-    if (!els.length) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const id = entry.target.id;
-          if (entry.isIntersecting) {
-            setActiveSection(id);
-          } else {
-            setActiveSection((cur) => (cur === id ? "" : cur));
-          }
-        });
-      },
-      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
-    );
-
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [pathname]);
-
-  const onHashClick = (e, id) => {
-    e.preventDefault();
-    const wasOpen = open;
-    close();
-
-    if (pathname !== "/") {
-      router.push(`/#${id}`);
-      return;
-    }
-
-    setTimeout(
-      () => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-        window.history.replaceState(null, "", `/#${id}`);
-      },
-      wasOpen ? DRAWER_CLOSE_MS : 0
-    );
-  };
-
+  // Home click: agar already home pe ho toh smooth scroll to top
   const onHomeClick = (e) => {
-    const wasOpen = open;
     close();
+    closeMenu();
     if (pathname !== "/") return;
 
     e.preventDefault();
-    setTimeout(
-      () => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        window.history.replaceState(null, "", "/");
-      },
-      wasOpen ? DRAWER_CLOSE_MS : 0
-    );
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.history.replaceState(null, "", "/");
   };
 
   const refreshAuth = useCallback(async (force = false) => {
@@ -247,6 +218,7 @@ export default function Nav() {
 
   const onProtectedClick = async (e) => {
     close();
+    closeMenu();
     if (authed) return;
     e.preventDefault();
     const ok = await refreshAuth(true);
@@ -254,17 +226,11 @@ export default function Nav() {
     else setLoginPrompt(true);
   };
 
-  const handlerFor = (l) => {
-    if (l.protected) return onProtectedClick;
-    if (l.hash) return (e) => onHashClick(e, l.hash);
-    if (l.top) return onHomeClick;
-    return close;
-  };
-
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
     close();
+    closeMenu();
     try {
       const res = await fetch("/api/auth/logout", {
         method: "POST",
@@ -282,9 +248,17 @@ export default function Nav() {
     }
   };
 
+  // route change => close everything
   useEffect(() => {
     setOpen(false);
+    setMenu(null);
+    setAcc("");
   }, [pathname]);
+
+  // reset drawer accordion when drawer closes
+  useEffect(() => {
+    if (!open) setAcc("");
+  }, [open]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -300,10 +274,25 @@ export default function Nav() {
     };
   }, [open, loginPrompt]);
 
+  // click outside dropdown => close
+  useEffect(() => {
+    if (!menu) return;
+    const onDown = (e) => {
+      if (!e.target.closest("[data-rm-dd]")) setMenu(null);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [menu]);
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
         close();
+        setMenu(null);
         setLoginPrompt(false);
       }
     };
@@ -316,10 +305,18 @@ export default function Nav() {
     };
   }, [close]);
 
+  // helper props for a desktop dropdown wrapper
+  const ddProps = (key) => ({
+    "data-rm-dd": true,
+    onMouseEnter: () => setMenu(key),
+    onMouseLeave: () => setMenu((cur) => (cur === key ? null : cur)),
+  });
+
   return (
     <div
       ref={rootRef}
       data-rm-nav
+      suppressHydrationWarning
       className={`rm-root ${poppins.variable} ${jost.variable}`}
       style={{ display: primary ? "contents" : "none" }}
     >
@@ -328,31 +325,140 @@ export default function Nav() {
         className={`rm-nav ${scrolled ? "rm-nav--scrolled" : ""} ${open ? "rm-nav--open" : ""}`}
       >
         <div className="rm-nav__inner">
-          {/* Logo image */}
-          <a href={LOGO_URL} className="rm-nav__logo" aria-label={LOGO_ALT}>
-            <img src={LOGO_SRC} alt={LOGO_ALT} className="rm-nav__logoImg" />
-          </a>
+          {/* ROW 1: centered logo */}
+          <div className="rm-nav__top" suppressHydrationWarning>
+            <a href={LOGO_URL} className="rm-nav__logo" aria-label={LOGO_ALT}>
+              <img src={LOGO_SRC} alt={LOGO_ALT} className="rm-nav__logoImg" />
+            </a>
 
-          {/* Right side */}
-          <div className="rm-nav__right">
-            <div
-              className="rm-nav__links"
-              role="navigation"
-              aria-label="Main navigation"
+            {/* Hamburger (mobile only) */}
+            <button
+              type="button"
+              className="rm-burger"
+              aria-label="Open menu"
+              aria-expanded={open}
+              aria-controls="rm-mobile-drawer"
+              onClick={() => setOpen(true)}
             >
-              {LINKS.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  scroll={!l.hash}
-                  onClick={handlerFor(l)}
-                  className={`rm-nav__link ${isActive(l) ? "is-active" : ""}`}
-                  aria-current={isActive(l) ? "page" : undefined}
-                >
-                  {l.label}
-                </Link>
-              ))}
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
+
+          {/* ROW 2: links (desktop only) */}
+          <div
+            className="rm-nav__bar"
+            role="navigation"
+            aria-label="Main navigation"
+          >
+            <Link href="/" onClick={onHomeClick} className="rm-nav__link">
+              Home
+            </Link>
+
+            {/* Apply for Exhibition dropdown */}
+            <div className="rm-dd" {...ddProps("apply")}>
+              <button
+                type="button"
+                className={`rm-nav__link rm-dd__trigger ${
+                  applyActive || menu === "apply" ? "is-active" : ""
+                }`}
+                aria-haspopup="true"
+                aria-expanded={menu === "apply"}
+                onClick={() => setMenu("apply")}
+              >
+                Apply for Exhibition
+                <Chevron className={menu === "apply" ? "is-flipped" : ""} />
+              </button>
+
+              <div
+                className={`rm-dd__wrap ${menu === "apply" ? "is-open" : ""}`}
+              >
+                <div className="rm-dd__panel rm-dd__panel--event">
+                  <span className="rm-event__tag">Upcoming Event</span>
+                  <p className="rm-event__city">{EVENT.city}</p>
+                  <h4 className="rm-event__name">{EVENT.name}</h4>
+                  <p className="rm-event__date">{EVENT.date}</p>
+
+                  <ul className="rm-event__list">
+                    <li>{EVENT.venue}</li>
+                    <li>{EVENT.categories}</li>
+                  </ul>
+
+                  <Link
+                    href={APPLY_HREF}
+                    className="rm-event__btn"
+                    onClick={closeMenu}
+                  >
+                    Apply for the Event
+                  </Link>
+                </div>
+              </div>
             </div>
+
+            {/* Events dropdown */}
+            <div className="rm-dd" {...ddProps("events")}>
+              <button
+                type="button"
+                className={`rm-nav__link rm-dd__trigger ${
+                  eventsActive || menu === "events" ? "is-active" : ""
+                }`}
+                aria-haspopup="true"
+                aria-expanded={menu === "events"}
+                onClick={() => setMenu("events")}
+              >
+                Events
+                <Chevron className={menu === "events" ? "is-flipped" : ""} />
+              </button>
+
+              <div
+                className={`rm-dd__wrap ${menu === "events" ? "is-open" : ""}`}
+              >
+                <div className="rm-dd__panel rm-dd__panel--list">
+                  {/* Upcoming Events => alag page */}
+                  <Link
+                    href={UPCOMING_HREF}
+                    className={`rm-dd__item ${
+                      upcomingActive ? "is-active" : ""
+                    }`}
+                    aria-current={upcomingActive ? "page" : undefined}
+                    onClick={closeMenu}
+                  >
+                    Upcoming Events
+                  </Link>
+
+                  {/* Previous Events => alag page */}
+                  <Link
+                    href={PREVIOUS_HREF}
+                    className={`rm-dd__item ${
+                      previousActive ? "is-active" : ""
+                    }`}
+                    aria-current={previousActive ? "page" : undefined}
+                    onClick={closeMenu}
+                  >
+                    Previous Events
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href={ABOUT_HREF}
+              onClick={closeMenu}
+              className={`rm-nav__link ${aboutActive ? "is-active" : ""}`}
+              aria-current={aboutActive ? "page" : undefined}
+            >
+              About
+            </Link>
+
+            <Link
+              href={DASHBOARD_HREF}
+              onClick={onProtectedClick}
+              className={`rm-nav__link ${dashActive ? "is-active" : ""}`}
+              aria-current={dashActive ? "page" : undefined}
+            >
+              Dashboard
+            </Link>
 
             {authed ? (
               <button
@@ -369,20 +475,6 @@ export default function Nav() {
               </Link>
             )}
           </div>
-
-          {/* Hamburger */}
-          <button
-            type="button"
-            className="rm-burger"
-            aria-label="Open menu"
-            aria-expanded={open}
-            aria-controls="rm-mobile-drawer"
-            onClick={() => setOpen(true)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
         </div>
       </div>
 
@@ -430,19 +522,108 @@ export default function Nav() {
           role="navigation"
           aria-label="Mobile navigation"
         >
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              scroll={!l.hash}
-              className={`rm-drawer__link ${isActive(l) ? "is-active" : ""}`}
-              tabIndex={open ? 0 : -1}
-              onClick={handlerFor(l)}
-            >
-              <span>{l.label}</span>
-              <Arrow />
-            </Link>
-          ))}
+          <Link
+            href="/"
+            className="rm-drawer__link"
+            tabIndex={open ? 0 : -1}
+            onClick={onHomeClick}
+          >
+            <span>Home</span>
+            <Arrow />
+          </Link>
+
+          {/* Apply for Exhibition (accordion) */}
+          <button
+            type="button"
+            className={`rm-drawer__link rm-drawer__acc ${
+              acc === "apply" ? "is-open" : ""
+            }`}
+            tabIndex={open ? 0 : -1}
+            aria-expanded={acc === "apply"}
+            onClick={() => setAcc((c) => (c === "apply" ? "" : "apply"))}
+          >
+            <span>Apply for Exhibition</span>
+            <Chevron className={acc === "apply" ? "is-flipped" : ""} />
+          </button>
+          <div className={`rm-acc ${acc === "apply" ? "is-open" : ""}`}>
+            <div className="rm-acc__inner">
+              <div className="rm-acc__event">
+                <span className="rm-event__tag">Upcoming Event</span>
+                <p className="rm-event__city">{EVENT.city}</p>
+                <h4 className="rm-event__name">{EVENT.name}</h4>
+                <p className="rm-event__date">{EVENT.date}</p>
+                <ul className="rm-event__list">
+                  <li>{EVENT.venue}</li>
+                  <li>{EVENT.categories}</li>
+                </ul>
+                <Link
+                  href={APPLY_HREF}
+                  className="rm-event__btn"
+                  tabIndex={open && acc === "apply" ? 0 : -1}
+                  onClick={close}
+                >
+                  Apply for the Event
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Events (accordion) */}
+          <button
+            type="button"
+            className={`rm-drawer__link rm-drawer__acc ${
+              acc === "events" ? "is-open" : ""
+            }`}
+            tabIndex={open ? 0 : -1}
+            aria-expanded={acc === "events"}
+            onClick={() => setAcc((c) => (c === "events" ? "" : "events"))}
+          >
+            <span>Events</span>
+            <Chevron className={acc === "events" ? "is-flipped" : ""} />
+          </button>
+          <div className={`rm-acc ${acc === "events" ? "is-open" : ""}`}>
+            <div className="rm-acc__inner">
+              {/* Upcoming Events => alag page */}
+              <Link
+                href={UPCOMING_HREF}
+                className="rm-acc__link"
+                tabIndex={open && acc === "events" ? 0 : -1}
+                onClick={close}
+              >
+                Upcoming Events
+              </Link>
+
+              {/* Previous Events => alag page */}
+              <Link
+                href={PREVIOUS_HREF}
+                className="rm-acc__link"
+                tabIndex={open && acc === "events" ? 0 : -1}
+                onClick={close}
+              >
+                Previous Events
+              </Link>
+            </div>
+          </div>
+
+          <Link
+            href={ABOUT_HREF}
+            className={`rm-drawer__link ${aboutActive ? "is-active" : ""}`}
+            tabIndex={open ? 0 : -1}
+            onClick={close}
+          >
+            <span>About</span>
+            <Arrow />
+          </Link>
+
+          <Link
+            href={DASHBOARD_HREF}
+            className={`rm-drawer__link ${dashActive ? "is-active" : ""}`}
+            tabIndex={open ? 0 : -1}
+            onClick={onProtectedClick}
+          >
+            <span>Dashboard</span>
+            <Arrow />
+          </Link>
         </div>
 
         <div className="rm-drawer__bottom">

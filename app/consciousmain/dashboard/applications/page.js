@@ -8,8 +8,8 @@ import { getBooth, priceBreakup, TAX_RATE } from "@/app/lib/booths";
 import styles from "./dashboard.module.css";
 
 // Routes yahan se change karo
-const LOGIN_PATH = "/login";
-const UPCOMING_PATH = "/upcoming-events";
+const LOGIN_PATH = "/consciousmain/login";
+const UPCOMING_PATH = "/consciousmain/upcomingpage";
 const PAYMENTS_PATH = "/consciousmain/dashboard/payments";
 
 const serif = Cormorant_Garamond({
@@ -21,6 +21,7 @@ const sans = Jost({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 const STEPS = ["Applied", "Review", "Booth", "Payment", "Confirmed"];
 const GST = Math.round(TAX_RATE * 100);
+const SEATS_PER_BOOTH = 10; // har booth category mein itni seats dikhengi
 
 // 1 = review, 2 = booth select, 3 = payment, 4 = confirmed
 const stageOf = (a) => {
@@ -92,6 +93,12 @@ const I = {
     <Svg size={s} sw={2}>
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
+    </Svg>
+  ),
+  back: (s) => (
+    <Svg size={s} sw={2}>
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
     </Svg>
   ),
   ticket: (s) => (
@@ -183,14 +190,20 @@ function Stepper({ stage }) {
   );
 }
 
-/* ================= BOOTH STAGE (list + selected panel) ================= */
+/* ================= BOOTH STAGE (ticket-style seat map + booking summary) ================= */
 function BoothStage({ app, booths, taken, busy, pickErr, onContinue, innerRef }) {
-  const [selName, setSelName] = useState(null);
-  const takenForEvent = taken?.[app.eventTitle] || {};
-  const leftOf = (b) => Math.max(b.stock - (takenForEvent[b.name] || 0), 0);
+  // sel = { name, no }  (no = sirf dikhane ke liye seat number; backend mein booth ka naam save hota hai)
+  const [sel, setSel] = useState(null);
 
-  const sel = booths.find((b) => b.name === selName) || null;
-  const selSoldOut = sel ? leftOf(sel) === 0 : false;
+  const takenForEvent = taken?.[app.eventTitle] || {};
+  const stockOf = () => SEATS_PER_BOOTH; // har booth ke 10 seats
+  const bookedOf = (b) => Math.min(takenForEvent[b.name] || 0, stockOf(b));
+  const leftOf = (b) => Math.max(stockOf(b) - bookedOf(b), 0);
+
+  const selIndex = sel ? booths.findIndex((b) => b.name === sel.name) : -1;
+  const selBooth = selIndex >= 0 ? booths[selIndex] : null;
+  const selSoldOut = selBooth ? leftOf(selBooth) === 0 : false;
+  const br = selBooth ? priceBreakup(selBooth) : null;
 
   return (
     <section className={styles.boothSection} ref={innerRef}>
@@ -198,74 +211,107 @@ function BoothStage({ app, booths, taken, busy, pickErr, onContinue, innerRef })
         <span className={styles.ticketIc}>{I.ticket(46)}</span>
         <div>
           <h3 className={`${styles.boothTitle} ${serif.className}`}>Choose Your Booth</h3>
-          <p className={styles.muted}>Select a booth category that best fits your brand and showcase requirements.</p>
+          <p className={styles.muted}>Pick a seat in the booth category that fits your brand, just like booking a ticket.</p>
         </div>
       </div>
 
       <div className={styles.boothLayout}>
-        {/* ---------- booth list ---------- */}
-        <ul className={styles.rows}>
-          {booths.map((b, i) => {
-            const left = leftOf(b);
-            const soldOut = left === 0;
-            const low = left > 0 && left <= 2;
-            const isSel = selName === b.name;
+        {/* ---------- seat map ---------- */}
+        <div className={styles.seatCard}>
+          <div className={styles.seatTop}>
+            <h4 className={`${styles.seatHeading} ${serif.className}`}>Select Your Booth</h4>
+            <ul className={styles.legend} aria-label="Seat legend">
+              <li><i className={`${styles.lgBox} ${styles.lgFree}`} />Available</li>
+              <li><i className={`${styles.lgBox} ${styles.lgSel}`} />Selected</li>
+              <li><i className={`${styles.lgBox} ${styles.lgBooked}`} />Booked</li>
+            </ul>
+          </div>
 
-            return (
-              <li
-                key={b.id}
-                className={`${styles.row} ${isSel ? styles.rowOn : ""} ${soldOut ? styles.rowSold : ""}`}
-                onClick={() => !soldOut && setSelName(b.name)}
-              >
-                <span className={styles.rowBadge} style={{ background: b.grad }}>B{i + 1}</span>
+          <ul className={styles.tiers}>
+            {booths.map((b, i) => {
+              const stock = stockOf(b);
+              const booked = bookedOf(b);
+              const left = leftOf(b);
+              const soldOut = left === 0;
+              const low = left > 0 && left <= 2;
+              const firstBooked = stock - booked; // is number ke baad ki seats booked
 
-                <div className={styles.rowName}>
-                  <h4 className={serif.className}>{b.name}</h4>
-                  {b.tag && <span className={`${styles.pill} ${tagClass(b.tag)}`}>{b.tag}</span>}
-                  {(soldOut || low) && (
-                    <span className={`${styles.stockNote} ${soldOut ? styles.stockNoteSold : ""}`}>
-                      {soldOut ? "Sold out" : `Only ${left} left`}
-                    </span>
-                  )}
-                </div>
+              return (
+                <li key={b.id} className={`${styles.tier} ${soldOut ? styles.tierSold : ""}`}>
+                  <div className={styles.tierHead}>
+                    <span className={styles.rowBadge}>B{i + 1}</span>
 
-                <p className={styles.rowPrice}>
-                  <strong>{inr(b.price)}</strong> <span>+ {GST}% GST</span>
-                </p>
+                    <div className={styles.tierInfo}>
+                      <div className={styles.tierName}>
+                        <h4 className={serif.className}>{b.name}</h4>
+                        {b.tag && <span className={`${styles.pill} ${tagClass(b.tag)}`}>{b.tag}</span>}
+                        {(soldOut || low) && (
+                          <span className={`${styles.stockNote} ${soldOut ? styles.stockNoteSold : ""}`}>
+                            {soldOut ? "Sold out" : `Only ${left} left`}
+                          </span>
+                        )}
+                      </div>
+                      <p className={styles.tierPrice}>
+                        <strong>{inr(b.price)}</strong> <span>+ {GST}% GST</span>
+                      </p>
+                    </div>
+                  </div>
 
-                <button
-                  type="button"
-                  className={`${styles.rowBtn} ${isSel ? styles.rowBtnOn : ""}`}
-                  disabled={busy || soldOut}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelName(b.name);
-                  }}
-                >
-                  {isSel ? <>{I.check(16)} Selected</> : soldOut ? "Sold out" : "Select"}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  <div className={styles.seats} role="group" aria-label={`${b.name} seats`}>
+                    {Array.from({ length: stock }, (_, n) => n + 1).map((no) => {
+                      const isBooked = no > firstBooked;
+                      const isSel = sel?.name === b.name && sel?.no === no;
+                      const label = String(no).padStart(2, "0");
 
-        {/* ---------- selected booth panel ---------- */}
+                      return (
+                        <button
+                          key={no}
+                          type="button"
+                          className={`${styles.seat} ${isSel ? styles.seatOn : ""} ${isBooked ? styles.seatBooked : ""}`}
+                          disabled={busy || isBooked}
+                          aria-pressed={isSel}
+                          aria-label={`${b.name} seat ${label}${isBooked ? ", booked" : ""}`}
+                          title={isBooked ? "Booked" : `${b.name} - ${label}`}
+                          onClick={() => setSel({ name: b.name, no })}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        {/* ---------- booking summary ---------- */}
         <aside className={styles.sidePanel}>
-          {sel ? (
-            <>
-              <p className={styles.sideLabel}>SELECTED BOOTH</p>
-              <div className={styles.sideTop}>
-                <h4 className={`${styles.sideName} ${serif.className}`}>{sel.name}</h4>
-                {sel.tag && <span className={`${styles.pill} ${tagClass(sel.tag)}`}>{sel.tag}</span>}
-              </div>
-              <p className={styles.sidePrice}>
-                <strong>{inr(sel.price)}</strong> <span>+ {GST}% GST</span>
-              </p>
-              <div className={styles.sideRule} />
+          <h4 className={`${styles.sumHeading} ${serif.className}`}>Booking Summary</h4>
 
-              <h5 className={styles.specTitle}>{I.box(22)} Inclusions &amp; Specifications</h5>
+          {selBooth ? (
+            <>
+              <div className={styles.sumBooth}>
+                <span className={styles.sumBadge}>B{selIndex + 1}</span>
+                <div className={styles.sumBoothInfo}>
+                  <strong className={serif.className}>{selBooth.name}</strong>
+                  <span className={styles.sumSeat}>Seat {String(sel.no).padStart(2, "0")}</span>
+                  {selBooth.tag && <span className={`${styles.pill} ${tagClass(selBooth.tag)}`}>{selBooth.tag}</span>}
+                </div>
+                <span className={styles.sumBoothPrice}>{inr(selBooth.price)}</span>
+              </div>
+
+              {br && (
+                <div className={styles.sumRows}>
+                  <div><span>Booth Price</span><span>{inr(br.base)}</span></div>
+                  <div><span>GST ({GST}%)</span><span>{inr(br.tax)}</span></div>
+                  <div className={styles.sumTotal}><span>Total Payable</span><span>{inr(br.total)}</span></div>
+                </div>
+              )}
+
+              <h5 className={styles.specTitle}>Booth Details</h5>
               <dl className={styles.spec}>
-                {Object.entries(sel.features || {}).map(([k, v]) => (
+                {Object.entries(selBooth.features || {}).map(([k, v]) => (
                   <div key={k}>
                     <dt>{featIcon(k)}<span>{k}</span></dt>
                     <dd>{v}</dd>
@@ -277,7 +323,7 @@ function BoothStage({ app, booths, taken, busy, pickErr, onContinue, innerRef })
                 type="button"
                 className={styles.continueBtn}
                 disabled={busy || selSoldOut}
-                onClick={() => onContinue(sel)}
+                onClick={() => onContinue(selBooth)}
               >
                 {busy ? "Saving..." : <>Continue to Payment {I.arrow(18)}</>}
               </button>
@@ -286,7 +332,7 @@ function BoothStage({ app, booths, taken, busy, pickErr, onContinue, innerRef })
             <div className={styles.sideEmpty}>
               <span className={styles.sideEmptyIc}>{I.box(30)}</span>
               <strong>No booth selected</strong>
-              <p>Select a booth from the list to see its inclusions and specifications.</p>
+              <p>Tap an available seat to see the price, inclusions and specifications.</p>
             </div>
           )}
         </aside>
@@ -325,7 +371,7 @@ function PaymentSection({ boothName, ready, busy, onPay, onChange, innerRef }) {
             </div>
           )}
           <button type="button" className={styles.linkBtn} onClick={onChange} disabled={busy}>
-            ← Change booth
+            {I.back(15)} Change booth
           </button>
         </div>
 
@@ -378,7 +424,7 @@ function PaymentSection({ boothName, ready, busy, onPay, onChange, innerRef }) {
           <button className={styles.btn} disabled={busy || !ready} onClick={() => onPay(method)}>
             {busy ? "Processing..." : `Pay ${inr(br?.total)}`}
           </button>
-          <p className={styles.note}>Demo payment only — no real money is charged and no card details are saved.</p>
+          <p className={styles.note}>Demo payment only. No real money is charged and no card details are saved.</p>
         </div>
       </div>
     </section>
@@ -461,7 +507,7 @@ function AppCard({ app, booths, taken, patch, reload, notify }) {
     const r = await patch({ id: app._id, action: "pay", method });
     await reload(); // stage 4 -> Booking confirmed
     setBusy(false);
-    notify(r.ok ? "Payment successful 🎉" : r.message || "Payment failed");
+    notify(r.ok ? "Payment successful" : r.message || "Payment failed");
     if (r.ok) scrollTo(cardRef);
   };
 

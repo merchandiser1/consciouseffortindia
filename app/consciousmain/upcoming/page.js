@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Cabin, Poppins } from "next/font/google";
 import Nav from "../../component/nav/Nav";
@@ -18,6 +18,11 @@ const poppins = Poppins({
 });
 
 const EVENT_TITLE = "#ConsciousEffort India, Hyderabad";
+
+/* Login: popup se login karne par user wapas isi form pe aayega */
+const LOGIN_PATH = "/consciousmain/login";
+const NEXT_PATH = "/consciousmain/upcoming";
+const LOGIN_HREF = `${LOGIN_PATH}?next=${encodeURIComponent(NEXT_PATH)}`;
 
 /* Limits (server checks the same things again) */
 const MAX_IMAGES = 5;
@@ -39,6 +44,20 @@ const formatSize = (b) =>
   b >= 1024 * 1024
     ? `${(b / 1024 / 1024).toFixed(1)} MB`
     : `${Math.round(b / 1024)} KB`;
+
+/* Login check (tumhara /api/auth/me: logged in => authenticated === true) */
+async function checkLogin() {
+  try {
+    const r = await fetch("/api/auth/me", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    const d = await r.json().catch(() => ({}));
+    return r.ok && d.authenticated === true;
+  } catch {
+    return false;
+  }
+}
 
 /* ---------- Icons ---------- */
 const Icon = ({ children, className }) => (
@@ -118,6 +137,23 @@ const CheckIcon = () => (
   </svg>
 );
 
+const LockIcon = () => (
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+  </svg>
+);
+
 const Leaf = ({ className }) => (
   <svg
     className={className}
@@ -152,6 +188,11 @@ export default function Upcoming() {
   const [imgError, setImgError] = useState(""); // shown right under the images box
   const [submitting, setSubmitting] = useState(false);
 
+  // login status: null = checking, true = logged in, false = not logged in
+  const [authed, setAuthed] = useState(null);
+  const [showLogin, setShowLogin] = useState(false); // "Please login" popup
+  const askingRef = useRef(false); // double check / double popup se bachne ke liye
+
   // success popup
   const [showModal, setShowModal] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
@@ -165,18 +206,62 @@ export default function Upcoming() {
     return () => previews.forEach((p) => URL.revokeObjectURL(p.url));
   }, [previews]);
 
-  // Popup: lock page scroll + close on Esc
+  // Page khulte hi login status pata kar lo
   useEffect(() => {
-    if (!showModal) return;
+    let alive = true;
+    checkLogin().then((ok) => {
+      if (alive) setAuthed(ok);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Popups: lock page scroll + close on Esc
+  useEffect(() => {
+    if (!showModal && !showLogin) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e) => e.key === "Escape" && setShowModal(false);
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setShowModal(false);
+        setShowLogin(false);
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [showModal]);
+  }, [showModal, showLogin]);
+
+  /* Fresh check karo; login nahi hai toh popup dikhao */
+  const askLogin = async () => {
+    if (askingRef.current) return;
+    askingRef.current = true;
+    try {
+      const ok = await checkLogin();
+      setAuthed(ok);
+      if (!ok) setShowLogin(true);
+    } finally {
+      askingRef.current = false;
+    }
+  };
+
+  /* User form mein kisi field pe gaya => login check (login nahi toh field mein jaane hi nahi dena) */
+  const onFormFocus = (e) => {
+    if (authed === true) return;
+    e.target.blur?.();
+    askLogin();
+  };
+
+  /* Upload boxes / buttons pe click => login check (file dialog khulne se pehle rok do) */
+  const onFormClick = (e) => {
+    if (authed === true) return;
+    if (!e.target.closest("label, button")) return;
+    e.preventDefault();
+    askLogin();
+  };
 
   const onChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -257,6 +342,12 @@ export default function Upcoming() {
     if (submitting) return;
     setError("");
 
+    // Submit se pehle bhi login confirm karo (session expire ho sakta hai)
+    if (authed !== true) {
+      await askLogin();
+      return;
+    }
+
     const v = {
       name: form.name.trim(),
       email: form.email.trim(),
@@ -292,6 +383,13 @@ export default function Upcoming() {
 
       const res = await fetch("/api/applications", { method: "POST", body: fd });
       const data = await res.json().catch(() => ({}));
+
+      // session expire / logout ho gaya => login popup
+      if (res.status === 401) {
+        setAuthed(false);
+        setShowLogin(true);
+        return;
+      }
 
       if (!res.ok || !data.success) {
         setError(data.message || "Something went wrong. Please try again.");
@@ -448,7 +546,13 @@ export default function Upcoming() {
               </aside>
 
               <div className={styles.formSide}>
-                <form className={styles.form} onSubmit={onSubmit} noValidate>
+                <form
+                  className={styles.form}
+                  onSubmit={onSubmit}
+                  onFocusCapture={onFormFocus}
+                  onClickCapture={onFormClick}
+                  noValidate
+                >
                   <div className={styles.row}>
                     <div className={styles.field}>
                       <label htmlFor="u-name">Full Name *</label>
@@ -644,6 +748,53 @@ export default function Upcoming() {
           </div>
         </section>
       </main>
+
+      {/* ================= "PLEASE LOGIN" POPUP ================= */}
+      {showLogin && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowLogin(false)}
+        >
+          <div
+            className={`${styles.modal} ${cabin.className}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="apply-login-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalIcon}>
+              <LockIcon />
+            </div>
+
+            <h3 id="apply-login-title" className={styles.modalTitle}>
+              Please login
+            </h3>
+
+            <p className={styles.modalText}>
+              You need to be logged in to apply for the event. After you log
+              in, you will come straight back to this form.
+            </p>
+
+            <div className={styles.modalActions}>
+              <Link
+                href={LOGIN_HREF}
+                className={`${styles.btn} ${poppins.className}`}
+                onClick={() => setShowLogin(false)}
+              >
+                <span className={styles.btnText}>Login</span>
+                <ArrowIcon />
+              </Link>
+              <button
+                type="button"
+                className={styles.linkBtn}
+                onClick={() => setShowLogin(false)}
+              >
+                Not now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= SUCCESS POPUP ================= */}
       {showModal && (

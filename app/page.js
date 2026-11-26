@@ -17,6 +17,12 @@ const poppins = Poppins({
   weight: ["500", "600"],
 });
 
+/* ---------- ABOUT VIDEO (file in /public) ---------- */
+const ABOUT_VIDEO = "/about.mp4"; // file: public/about.mp4
+
+/* ---------- PREVIOUS EVENTS PAGE (View More button) ---------- */
+const PREVIOUS_HREF = "/consciousmain/previouspage";
+
 const ArrowIcon = () => (
   <svg
     className={styles.arrow}
@@ -75,6 +81,26 @@ const pastEvents = [
     venue: "The Lodhi, Delhi",
     tags: "Fashion, Fine Jewellery, Accessories, Gifting & Home",
     img: "/new3.jpg",
+  },
+  {
+    year: "2026",
+    title: ["A ", "holiday", " Edit"],
+    day: "7",
+    ord: "th",
+    month: "April, 2026",
+    venue: "The Quorum, Hyderabad",
+    tags: "Ready-To-Wear, Celebration Wear, Bridal, Jewellery, Fine Jewellery, Gifting & Menswear",
+    img: "/april-hyderabad.jpg", // <- apni image public/ me isi naam se rakh
+  },
+  {
+    year: "2026",
+    title: ["The", "Trunk", "Show"],
+    day: "18",
+    ord: "th",
+    month: "February, 2026",
+    venue: "The Lodhi, Delhi",
+    tags: "Ready-To-Wear, Celebration Wear, Bridal, Jewellery, Fine Jewellery, Gifting & Menswear",
+    img: "/feb-lodhi.jpg", // <- apni image public/ me isi naam se rakh
   },
 ];
 
@@ -171,54 +197,43 @@ export default function Home() {
     <>
       <Nav />
 
-      {/* ================= HERO ================= */}
-      <section className={`${styles.hero} ${cabin.className}`}>
-        <div className={styles.container}>
-          {/* LEFT */}
-          <div className={styles.content}>
-            <p className={`${styles.est} ${styles.fade}`} style={{ "--d": "0.1s" }}>
-              <span className={styles.line} />
-              Est. 2017
+      {/* ================= ABOUT VIDEO (full width, loop, no controls) ================= */}
+      <section className={styles.videoSec}>
+        <video
+          className={styles.video}
+          src={ABOUT_VIDEO}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          controlsList="nodownload noplaybackrate nofullscreen"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
+      </section>
+
+      {/* ================= SPONSORS ================= */}
+      <section id="sponsors" className={`${styles.sponsors} ${cabin.className}`}>
+        <div className={styles.sponsorsContainer}>
+          <div className={`${styles.sponsorsHead} ${styles.reveal}`}>
+            <p className={`${styles.eyebrow} ${poppins.className}`}>
+              <span />
+              Our Partners
+              <span />
             </p>
 
-            <h1 className={`${styles.title} ${styles.fade}`} style={{ "--d": "0.2s" }}>
-              #ConsciousEffort India
-            </h1>
-
-            <h2 className={`${styles.subtitle} ${styles.fade}`} style={{ "--d": "0.35s" }}>
-              India’s Leading Sustainable Fashion &amp; Lifestyle Event
+            <h2 className={styles.sponsorsTitle}>
+              Sponsors – <em>Past &amp; Present</em>
             </h2>
-
-            <p className={`${styles.text} ${styles.fade}`} style={{ "--d": "0.5s" }}>
-              Founded in 2017, #ConsciousEffort India is India’s first and
-              largest platform on a mission to educate, engage and empower
-              people about sustainability in the fashion, beauty &amp; lifestyle
-              industry. We host conversations with the industry’s most profound
-              change makers, give sustainable brands a platform to showcase
-              through curated pop-ups and build a community that champion’s
-              conscious fashion and living.
-            </p>
-
-            <div className={`${styles.actions} ${styles.fade}`} style={{ "--d": "0.65s" }}>
-              <Link href="/consciousmain/upcoming" className={`${styles.btn} ${poppins.className}`}>
-                <span className={styles.btnText}>Apply for the Event</span>
-                <ArrowIcon />
-              </Link>
-            </div>
           </div>
+        </div>
 
-          {/* RIGHT */}
-          <div className={styles.imageWrap}>
-            <div className={styles.frame}>
-              <Image
-                src="/headerposter.png"
-                alt="#ConsciousEffort India sustainable fashion event"
-                fill
-                priority
-                sizes="(max-width: 900px) 90vw, 45vw"
-                className={styles.image}
-              />
-            </div>
+        <div className={styles.marquee} aria-label="Our sponsors">
+          <div className={styles.marqueeTrack}>
+            <SponsorGroup />
+            <SponsorGroup hidden />
           </div>
         </div>
       </section>
@@ -331,75 +346,74 @@ export default function Home() {
             </p>
           </div>
 
+          {/* 3 cards upar, last row ke 2 cards wide (khali jagah nahi dikhegi) */}
           <div className={styles.pastGrid}>
-            {pastEvents.map((e) => (
-              <article
-                key={`${e.year}-${e.title.join("")}`}
-                className={`${styles.pastCard} ${styles.reveal}`}
-              >
-                <div className={styles.pastMedia}>
-                  <Image
-                    src={e.img}
-                    alt={`${e.title.join("")} — ${e.venue}`}
-                    fill
-                    sizes="(max-width: 480px) 90vw, (max-width: 1099px) 22vw, 14vw"
-                    className={styles.pastImg}
-                  />
-                </div>
+            {pastEvents.map((e, i) => {
+              const total = pastEvents.length;
+              const rem = total % 3;
+              const inLastRow = i >= total - rem;
+              const wide = rem === 2 && inLastRow; // last 2 cards => wide
+              const single = rem === 1 && inLastRow; // last 1 card => centered
+              const lastOdd = i === total - 1 && total % 2 === 1; // tablet ke liye
 
-                <div className={styles.pastBody}>
-                  <span className={`${styles.yearPill} ${poppins.className}`}>
-                    {e.year}
-                  </span>
+              return (
+                <article
+                  key={`${e.day}-${e.month}-${e.venue}`}
+                  className={`${styles.pastCard} ${wide ? styles.pastWide : ""} ${
+                    single ? styles.pastSingle : ""
+                  } ${lastOdd ? styles.pastLastOdd : ""} ${styles.reveal}`}
+                >
+                  <div className={styles.pastMedia}>
+                    <Image
+                      src={e.img}
+                      alt={`${e.title.join("")} — ${e.venue}`}
+                      fill
+                      sizes="(max-width: 480px) 90vw, (max-width: 1099px) 40vw, 22vw"
+                      className={styles.pastImg}
+                    />
+                  </div>
 
-                  <h3 className={styles.pastName}>
-                    {e.title[0]}
-                    {e.title[1] && <em>{e.title[1]}</em>}
-                    {e.title[2]}
-                  </h3>
+                  <div className={styles.pastBody}>
+                    <span className={`${styles.yearPill} ${poppins.className}`}>
+                      {e.year}
+                    </span>
 
-                  <ul className={styles.pastMeta}>
-                    <li>
-                      <CalendarIcon />
-                      <span>
-                        {e.day}
-                        <sup>{e.ord}</sup> {e.month}
-                      </span>
-                    </li>
-                    <li>
-                      <PinIcon />
-                      <span>{e.venue}</span>
-                    </li>
-                  </ul>
+                    <h3 className={styles.pastName}>
+                      {e.title[0]}
+                      {e.title[1] && <em>{e.title[1]}</em>}
+                      {e.title[2]}
+                    </h3>
 
-                  <p className={styles.pastTags}>{e.tags}</p>
-                </div>
-              </article>
-            ))}
+                    <ul className={styles.pastMeta}>
+                      <li>
+                        <CalendarIcon />
+                        <span>
+                          {e.day}
+                          <sup>{e.ord}</sup> {e.month}
+                        </span>
+                      </li>
+                      <li>
+                        <PinIcon />
+                        <span>{e.venue}</span>
+                      </li>
+                    </ul>
+
+                    <p className={styles.pastTags}>{e.tags}</p>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        </div>
-      </section>
 
-      {/* ================= SPONSORS ================= */}
-      <section id="sponsors" className={`${styles.sponsors} ${cabin.className}`}>
-        <div className={styles.sponsorsContainer}>
-          <div className={`${styles.sponsorsHead} ${styles.reveal}`}>
-            <p className={`${styles.eyebrow} ${poppins.className}`}>
-              <span />
-              Our Partners
-              <span />
-            </p>
-
-            <h2 className={styles.sponsorsTitle}>
-              Sponsors – <em>Past &amp; Present</em>
-            </h2>
-          </div>
-        </div>
-
-        <div className={styles.marquee} aria-label="Our sponsors">
-          <div className={styles.marqueeTrack}>
-            <SponsorGroup />
-            <SponsorGroup hidden />
+          {/* View More => Previous Events page */}
+          <div className={`${styles.pastMore} ${styles.reveal}`}>
+            <Link
+              href={PREVIOUS_HREF}
+              className={`${styles.btn} ${poppins.className}`}
+            >
+              <span className={styles.btnText}>View More</span>
+              <ArrowIcon />
+            </Link>
           </div>
         </div>
       </section>

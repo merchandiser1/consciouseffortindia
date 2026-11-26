@@ -1,0 +1,465 @@
+/* =========================================================
+   PREVIOUS EVENTS PAGE
+   ========================================================= */
+.pv-page {
+  --cream: #fbf7f0;
+  --cream-2: #f6efe2;
+  --gold: #b8935a;
+  --gold-dark: #8a6a3a;
+  --pill: #ecd9b0;
+  --line: #e6d7bb;
+  width: 100%;
+  background: #fff;
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   HERO (header image + centered title + content)
+   ========================================================= */
+.pv-heroSec {
+  width: 100%;
+  /* fixed nav ke neeche se shuru */
+  padding: calc(var(--rm-nav-h, 154px) + 5px) 0 0;
+  background: #fff;
+  line-height: 0;
+}
+
+.pv-hero {
+  position: relative;
+  width: 100%;
+  height: clamp(340px, 44vw, 560px);
+  overflow: hidden;
+  background: #222;
+}
+
+.pv-heroImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+.pv-heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(0, 0, 0, 0.45),
+    rgba(0, 0, 0, 0.62)
+  );
+  z-index: 1;
+}
+
+.pv-heroText {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px clamp(20px, 5vw, 60px);
+  text-align: center;
+  line-height: normal;
+}
+
+.pv-heroEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  font-size: clamp(0.75rem, 1.6vw, 1.1rem);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #f1dfb8;
+}
+
+.pv-heroEyebrow span {
+  display: block;
+  width: clamp(24px, 5vw, 80px);
+  height: 1px;
+  background: #f1dfb8;
+}
+
+.pv-heroTitle {
+  margin: 0;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 7vw, 5.4rem);
+  line-height: 1.08;
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.pv-heroTitle em {
+  font-style: italic;
+}
+
+.pv-heroSub {
+  margin: 4px 0 0;
+  max-width: 760px;
+  font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================================
+   PAST EVENTS GRID
+   ========================================================= */
+.pv-past {
+  position: relative;
+  width: 100%;
+  padding: 80px 24px 100px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.pv-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.pv-leafTop,
+.pv-leafBottom {
+  position: absolute;
+  color: var(--gold);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pv-leafTop {
+  top: 24px;
+  right: -10px;
+  width: 190px;
+  transform: rotate(18deg);
+}
+
+.pv-leafBottom {
+  bottom: 10px;
+  left: -14px;
+  width: 140px;
+  transform: rotate(-160deg) scaleX(-1);
+}
+
+/* 6 columns => normal card = 2 cols, wide card = 3 cols */
+.pv-grid {
+  --gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.pv-card {
+  grid-column: span 2;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42% 1fr;
+  min-height: 230px;
+  background: linear-gradient(135deg, var(--cream), var(--cream-2));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 6px rgba(120, 90, 40, 0.06),
+    0 14px 30px rgba(120, 90, 40, 0.1);
+  transition: transform 0.45s ease, box-shadow 0.45s ease;
+}
+
+.pv-wide {
+  grid-column: span 3;
+  grid-template-columns: 38% 1fr;
+  min-height: 250px;
+}
+
+.pv-single {
+  grid-column: 3 / span 2;
+}
+
+.pv-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0 4px 10px rgba(120, 90, 40, 0.08),
+    0 22px 44px rgba(120, 90, 40, 0.16);
+}
+
+.pv-media {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream-2);
+}
+
+.pv-img {
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.9s ease;
+}
+
+.pv-card:hover .pv-img {
+  transform: scale(1.07);
+}
+
+.pv-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  padding: 22px clamp(16px, 1.8vw, 26px);
+}
+
+.pv-yearPill {
+  display: inline-block;
+  padding: 5px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: normal;
+  color: #3a2a10;
+  background: var(--pill);
+  border-radius: 6px;
+}
+
+.pv-name {
+  margin: 0 0 14px;
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 400;
+  font-size: clamp(1.35rem, 1.9vw, 1.75rem);
+  line-height: 1.12;
+  color: #111;
+}
+
+.pv-name em {
+  font-style: italic;
+}
+
+.pv-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  width: 100%;
+}
+
+.pv-meta li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: #222;
+}
+
+.pv-meta sup {
+  font-size: 0.6em;
+  line-height: 0;
+}
+
+.pv-metaIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: #222;
+}
+
+.pv-tags {
+  width: 100%;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: "Times New Roman", Times, serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #444;
+}
+
+@media (min-width: 1100px) {
+  .pv-wide .pv-name {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+  }
+}
+
+/* ---------- Scroll reveal (Chrome / Edge) ---------- */
+@supports (animation-timeline: view()) {
+  .pv-reveal {
+    animation: pvRevealUp linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+
+  @keyframes pvRevealUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .pv-card,
+  .pv-img {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+/* ---------- Large laptop ---------- */
+@media (max-width: 1280px) {
+  .pv-grid {
+    --gap: 18px;
+  }
+  .pv-card {
+    grid-template-columns: 40% 1fr;
+  }
+  .pv-wide {
+    grid-template-columns: 36% 1fr;
+  }
+}
+
+/* ---------- Tablet: 2 per row ---------- */
+@media (max-width: 1099px) {
+  .pv-grid {
+    --gap: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pv-card,
+  .pv-wide,
+  .pv-single {
+    grid-column: auto;
+    grid-template-columns: 42% 1fr;
+    min-height: 230px;
+  }
+
+  .pv-lastOdd {
+    grid-column: 1 / -1;
+  }
+
+  .pv-leafTop {
+    width: 150px;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 900px) {
+  .pv-heroSec {
+    padding-top: calc(var(--rm-nav-h, 76px) + 14px);
+  }
+
+  .pv-hero {
+    height: clamp(360px, 70vw, 460px);
+  }
+
+  .pv-past {
+    padding: 56px 20px 70px;
+  }
+
+  .pv-leafTop {
+    width: 110px;
+    opacity: 0.35;
+  }
+
+  .pv-leafBottom {
+    width: 90px;
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Single column (cards stay horizontal) ---------- */
+@media (max-width: 700px) {
+  .pv-grid {
+    --gap: 18px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pv-card,
+  .pv-wide,
+  .pv-single,
+  .pv-lastOdd {
+    grid-column: auto;
+    grid-template-columns: 38% 1fr;
+    min-height: 210px;
+  }
+
+  .pv-card:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Small mobile ---------- */
+@media (max-width: 480px) {
+  .pv-heroSec {
+    padding-top: calc(var(--rm-nav-h, 68px) + 10px);
+  }
+
+  .pv-hero {
+    height: auto;
+    min-height: 380px;
+  }
+
+  .pv-heroText {
+    position: relative;
+    inset: auto;
+    min-height: 380px;
+    gap: 12px;
+    padding: 36px 18px;
+  }
+
+  .pv-heroEyebrow {
+    gap: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .pv-heroEyebrow span {
+    width: 20px;
+  }
+
+  .pv-heroSub {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .pv-past {
+    padding: 40px 16px 60px;
+  }
+
+  /* image on top, details below */
+  .pv-card,
+  .pv-wide,
+  .pv-single,
+  .pv-lastOdd {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .pv-media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .pv-img {
+    object-position: center 20%;
+  }
+
+  .pv-body {
+    padding: 20px 20px 24px;
+  }
+
+  .pv-name {
+    font-size: 1.5rem;
+  }
+}

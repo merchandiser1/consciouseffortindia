@@ -2,7 +2,8 @@
   --rm-ink: #ffffff;
   --rm-bg: #000;
   --rm-muted: #9a9a9a;
-  --rm-nav-h: 80px;
+  /* total fixed header height (logo row + links row) */
+  --rm-nav-h: 140px;
   --rm-drawer-w: clamp(280px, 78vw, 380px);
   --rm-ease: cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -12,6 +13,14 @@
   --rm-logo-font: var(--font-jost), "Jost", "Helvetica Neue", Arial, sans-serif;
 }
 
+/* anchors don't hide under the fixed header */
+#upcoming,
+#previous,
+.upcoming,
+.past {
+  scroll-margin-top: calc(var(--rm-nav-h) + 10px);
+}
+
 /* ---------- Header: pure black ---------- */
 .rm-nav {
   position: fixed;
@@ -19,7 +28,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  height: var(--rm-nav-h);
+  min-height: var(--rm-nav-h);
   background: var(--rm-bg);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--rm-font);
@@ -34,63 +43,71 @@
 }
 
 .rm-nav__inner {
-  height: 100%;
   max-width: 1360px;
   margin: 0 auto;
   padding: 0 clamp(20px, 4vw, 56px);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* ---------- Logo (image) ---------- */
+/* ---------- ROW 1: logo (centered) ---------- */
+.rm-nav__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 0 4px;
+}
+
 .rm-nav__logo {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-content: center;
+  height: 64px; /* sirf itna hissa dikhega */
+  overflow: hidden; /* logo image ka extra khali part kat jayega */
   min-width: 0;
   text-decoration: none;
 }
 
 .rm-nav__logoImg {
   display: block;
-  height: 140px;
+  height: 150px; /* image ka asli size, box se bada */
   width: auto;
-  max-width: 100%;
+  max-width: none;
+  flex-shrink: 0;
   object-fit: contain;
-  object-position: left center;
 }
 
-/* ---------- Right side ---------- */
-.rm-nav__right {
+/* ---------- ROW 2: links ---------- */
+.rm-nav__bar {
   display: flex;
   align-items: center;
-  gap: 20px;
-}
-
-.rm-nav__links {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 0 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .rm-nav__link {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 10px 18px;
+  border: 0;
   border-radius: 999px;
+  background: none;
   color: var(--rm-ink);
   text-decoration: none;
+  font-family: inherit;
   font-size: 0.92rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
+  cursor: pointer;
 }
 
-.upcoming,
-.past {
-  scroll-margin-top: 30px;
-}
 .rm-nav__link::after {
   content: "";
   position: absolute;
@@ -105,25 +122,40 @@
 }
 
 .rm-nav__link:hover::after,
-.rm-nav__link:focus-visible::after {
+.rm-nav__link:focus-visible::after,
+.rm-nav__link.is-active::after {
   transform: scaleX(1);
   transform-origin: left;
 }
 
-.rm-nav__link.is-active::after {
+/* dropdown buttons (Apply for Exhibition / Events): no underline */
+.rm-dd__trigger::after,
+.rm-dd__trigger:hover::after,
+.rm-dd__trigger:focus-visible::after,
+.rm-dd__trigger.is-active::after {
   display: none;
+}
+
+/* chevron */
+.rm-chev {
+  flex-shrink: 0;
+  transition: transform 0.3s var(--rm-ease);
+}
+.rm-chev.is-flipped {
+  transform: rotate(180deg);
 }
 
 /* ---------- Desktop Login / Logout ---------- */
 .rm-nav__login {
   display: inline-block;
-  padding: 12px 34px;
+  margin-left: 12px;
+  padding: 8px 28px;
   border: 1.5px solid #fff;
   border-radius: 0;
   background: #fff;
   color: #000;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   transition: background 0.3s ease, color 0.3s ease;
@@ -142,15 +174,170 @@ button.rm-nav__login {
 }
 
 .rm-nav a:focus-visible,
+.rm-nav button:focus-visible,
 .rm-burger:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;
 }
 
-/* ---------- Hamburger ---------- */
+/* ---------- Desktop dropdowns ---------- */
+.rm-dd {
+  position: relative;
+}
+
+/* transparent wrapper => no hover gap between button and panel */
+.rm-dd__wrap {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  padding-top: 10px;
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.3s var(--rm-ease),
+    visibility 0.25s;
+  z-index: 5;
+}
+
+.rm-dd__wrap.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.rm-dd__panel {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  text-align: left;
+}
+
+.rm-dd__panel--list {
+  min-width: 220px;
+  padding: 8px;
+}
+
+.rm-dd__item {
+  display: block;
+  padding: 13px 16px;
+  color: #000;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border-left: 2px solid transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.rm-dd__item:hover,
+.rm-dd__item:focus-visible,
+.rm-dd__item.is-active {
+  background: #f3f3f3;
+  border-left-color: #000;
+}
+
+.rm-dd__panel a:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: -2px;
+}
+
+/* ---------- Event card (dropdown + drawer) ---------- */
+.rm-dd__panel--event {
+  width: 340px;
+  padding: 26px 26px 24px;
+}
+
+.rm-event__tag {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #000;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rm-event__city {
+  margin: 14px 0 2px;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rm-event__name {
+  margin: 0 0 6px;
+  font-family: var(--rm-logo-font);
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.rm-event__date {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.rm-event__list {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #e8e8e8;
+}
+
+.rm-event__list li {
+  position: relative;
+  padding: 10px 0 10px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  color: #333;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.rm-event__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #000;
+}
+
+.rm-event__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  background: #000;
+  color: #fff;
+  border: 1.5px solid #000;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.rm-event__btn:hover,
+.rm-event__btn:focus-visible {
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- Hamburger (mobile only) ---------- */
 .rm-burger {
   display: none;
-  position: relative;
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
   flex-shrink: 0;
   width: 44px;
   height: 44px;
@@ -228,6 +415,7 @@ button.rm-nav__login {
 }
 
 .rm-drawer a:focus-visible,
+.rm-drawer button:focus-visible,
 .rm-close:focus-visible {
   outline: 2px solid #000;
   outline-offset: 3px;
@@ -240,7 +428,7 @@ button.rm-nav__login {
   justify-content: space-between;
   gap: 10px;
   flex-shrink: 0;
-  min-height: 96px;
+  min-height: 84px;
   margin: 0 -24px 6px;
   padding: 0 24px;
   border-bottom: 1px solid #e8e8e8;
@@ -257,7 +445,7 @@ button.rm-nav__login {
    (If your logo is already dark, delete the filter line.) */
 .rm-drawer__logoImg {
   display: block;
-  height: 90px;
+  height: 60px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -312,12 +500,21 @@ button.rm-nav__login {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding: 17px 2px;
+  border: 0;
   border-bottom: 1px solid #e8e8e8;
+  background: none;
   color: #000;
   text-decoration: none;
+  font-family: inherit;
   font-size: 0.98rem;
   font-weight: 500;
+  text-align: left;
+}
+
+button.rm-drawer__link {
+  cursor: pointer;
 }
 
 .rm-drawer__link::after {
@@ -339,7 +536,15 @@ button.rm-nav__login {
   transform-origin: left;
 }
 
-.rm-drawer__link.is-active {
+/* accordion buttons (Apply for Exhibition / Events): no underline */
+.rm-drawer__acc::after,
+.rm-drawer__acc:hover::after,
+.rm-drawer__acc.is-open::after {
+  display: none;
+}
+
+.rm-drawer__link.is-active,
+.rm-drawer__acc.is-open {
   font-weight: 700;
 }
 
@@ -352,6 +557,50 @@ button.rm-nav__login {
 .rm-drawer__link:hover .rm-drawer__arrow,
 .rm-drawer__link.is-active .rm-drawer__arrow {
   opacity: 1;
+}
+
+/* ---------- Drawer accordion ---------- */
+.rm-acc {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows 0.4s var(--rm-ease), visibility 0.4s;
+}
+
+.rm-acc.is-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+}
+
+.rm-acc__inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.rm-acc__link {
+  display: block;
+  padding: 14px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #000;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: #fafafa;
+}
+
+.rm-acc__link:hover {
+  background: #f1f1f1;
+}
+
+.rm-acc__event {
+  margin: 12px 0 16px;
+  padding: 20px 18px 18px;
+  background: #fafafa;
+  border: 1px solid #ececec;
+}
+
+.rm-acc__event .rm-event__name {
+  font-size: 1.25rem;
 }
 
 /* ---------- Login / Logout at the bottom ---------- */
@@ -508,27 +757,37 @@ button.rm-drawer__login:disabled {
 
 /* small laptops / big tablets (landscape) */
 @media (max-width: 1100px) and (min-width: 992px) {
-  .rm-nav__logoImg { height: 120px; }
-  .rm-nav__link { padding: 10px 12px; }
+  :root { --rm-nav-h: 132px; }
+  .rm-nav__logo { height: 56px; }
+  .rm-nav__logoImg { height: 130px; }
+  .rm-nav__link { padding: 10px 12px; font-size: 0.88rem; }
   .rm-nav__link::after { left: 12px; right: 12px; }
 }
 
-/* tablet + mobile: hamburger layout */
+/* tablet + mobile: hamburger layout (logo centered, burger right) */
 @media (max-width: 991px) {
   :root { --rm-nav-h: 76px; }
 
-  .rm-nav__right { display: none; }
-  .rm-burger { display: block; margin-right: -10px; }
+  .rm-nav__bar { display: none; }
+  .rm-burger { display: block; }
+
+  .rm-nav__top { padding: 6px 0; }
+  .rm-nav__logo { height: 56px; }
   .rm-nav__logoImg { height: 120px; }
 }
 
 @media (max-width: 420px) {
-  .rm-nav__logoImg { height: 105px; }
+  :root { --rm-nav-h: 68px; }
+  .rm-nav__top { padding: 6px 0; }
+  .rm-nav__logo { height: 48px; }
+  .rm-nav__logoImg { height: 104px; }
 }
 
 @media (max-width: 360px) {
+  :root { --rm-nav-h: 62px; }
+  .rm-nav__logo { height: 42px; }
   .rm-nav__logoImg { height: 90px; }
-  .rm-drawer__logoImg { height: 76px; }
+  .rm-drawer__logoImg { height: 50px; }
 }
 
 @media (min-width: 992px) {

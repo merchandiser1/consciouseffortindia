@@ -17,6 +17,12 @@ export async function submitApplication(req) {
     const rl = rateLimit(`apply:${ip}`, 10, 60 * MIN);
     if (!rl.allowed) return tooMany(rl.retryAfter);
 
+    // Login required: pehle check, uske baad hi kuch parse / upload hoga
+    const authUser = await getAuthUser();
+    if (!authUser) {
+      return fail("Please log in to submit your application.", 401);
+    }
+
     let formData;
     try {
       formData = await req.formData();
@@ -30,9 +36,6 @@ export async function submitApplication(req) {
     }
 
     await connectDB();
-
-    // Logged-in applicants get linked to their account (public apply still works)
-    const authUser = await getAuthUser().catch(() => null);
 
     // Upload the PDF + all images at the same time
     const jobs = [
@@ -52,7 +55,7 @@ export async function submitApplication(req) {
     const [cat, ...imgs] = uploaded;
 
     const doc = await Application.create({
-      userId: authUser?.id || null,
+      userId: authUser.id, // ab hamesha logged-in user se linked
       eventTitle: EVENT_TITLE,
       ...values,
       catalogueUrl: cat.url,
