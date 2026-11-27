@@ -70,7 +70,7 @@ const pastEvents = [
     month: "August, 2026",
     venue: "Park Hyatt, Hyderabad",
     tags: "Fashion, Fine Jewellery, Accessories, Gifting & Home",
-    img: "/new2.jpg",
+    img: "/previous2.jpeg",
   },
   {
     year: "2026",
@@ -80,7 +80,7 @@ const pastEvents = [
     month: "July, 2026",
     venue: "The Lodhi, Delhi",
     tags: "Fashion, Fine Jewellery, Accessories, Gifting & Home",
-    img: "/new3.jpg",
+    img: "/previous3.jpeg",
   },
   {
     year: "2026",
@@ -90,7 +90,7 @@ const pastEvents = [
     month: "April, 2026",
     venue: "The Quorum, Hyderabad",
     tags: "Ready-To-Wear, Celebration Wear, Bridal, Jewellery, Fine Jewellery, Gifting & Menswear",
-    img: "/april-hyderabad.jpg", // <- apni image public/ me isi naam se rakh
+    img: "/previous4.jpeg", // <- apni image public/ me isi naam se rakh
   },
   {
     year: "2026",
@@ -100,7 +100,7 @@ const pastEvents = [
     month: "February, 2026",
     venue: "The Lodhi, Delhi",
     tags: "Ready-To-Wear, Celebration Wear, Bridal, Jewellery, Fine Jewellery, Gifting & Menswear",
-    img: "/feb-lodhi.jpg", // <- apni image public/ me isi naam se rakh
+    img: "/previous5.jpeg", // <- apni image public/ me isi naam se rakh
   },
 ];
 
